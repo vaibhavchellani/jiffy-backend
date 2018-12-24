@@ -2,18 +2,17 @@ package src
 
 import (
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/accounts/abi"
 )
+
 type ContractObj struct {
-	Name string `json:"name"`
-	Address common.Address `json:"contract_address`
-	ABI abi.ABI
+	Name    string        	`bson:"name"`
+	Address string `bson:"address`
+	Network string         `bson:"network"`
+	ABI     []byte        `bson:"abi"`
 }
 
 type Contracts []ContractObj
 
 type User struct {
 	Address common.Address `json:"user_address"`
-
 }
-

@@ -1,8 +1,8 @@
 package src
 
 import (
-	"net/http"
 	"github.com/gorilla/mux"
+	"net/http"
 )
 
 // Route defines a route
@@ -15,13 +15,14 @@ type Route struct {
 
 // Routes defines the list of routes of our API
 type Routes []Route
+
 var controller = &Controller{DB: DB{}}
 var routes = Routes{
 	Route{
-		"Index",
+		"RegisterContract",
 		"POST",
-		"/",
-		controller.RegisterContract,
+		"/register/{entity}",
+		controller.Register,
 	},
 	//Route{
 	//	"AddAlbum",
