@@ -4,11 +4,9 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/jiffy-backend/src"
 	"fmt"
+	"github.com/jiffy-backend/src"
 )
-
-
 
 func main() {
 	r := src.NewRouter()

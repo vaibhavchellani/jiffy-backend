@@ -5,10 +5,10 @@ import (
 )
 
 type ContractObj struct {
-	Name    string        	`bson:"name"`
+	Name    string `bson:"name"`
 	Address string `bson:"address`
-	Network string         `bson:"network"`
-	ABI     []byte        `bson:"abi"`
+	Network string `bson:"network"`
+	ABI     []byte `bson:"abi"`
 }
 
 type Contracts []ContractObj
