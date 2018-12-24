@@ -63,6 +63,8 @@ func (DB *DB) GetContracts() (contracts []ContractObj,err error){
 	}
 
 
+
+
 	
 	defer cur.Close(ctx)
 	for cur.Next(ctx) {
