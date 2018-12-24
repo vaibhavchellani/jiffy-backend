@@ -2,7 +2,6 @@ package src
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
@@ -14,6 +13,7 @@ type Controller struct {
 	DB DB
 }
 
+// handler for registrations (labels / contracts)
 func (c *Controller) Register(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	entity := vars["entity"]
@@ -28,6 +28,7 @@ func (c *Controller) Register(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+
 type ContractInput struct {
 	Name    string `json:"name"`
 	Address string `json:"address"`
@@ -35,7 +36,10 @@ type ContractInput struct {
 	ABI     abi.ABI `json:"abi"`
 }
 
+// handler for contract registration
 func (c *Controller) RegisterContract(w http.ResponseWriter, r *http.Request) {
+	var logger = Logger.With("module","controller")
+
 	var m ContractInput
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -66,11 +70,16 @@ func (c *Controller) RegisterContract(w http.ResponseWriter, r *http.Request) {
 		Network:m.Network,
 		ABI : abiBytes,
 	}
+	logger.Debug("Registering contract .....", "Address",contract.Address,"Name",contract.Name,"Network",contract.Network)
 
-	fmt.Printf("contract address: %v \n abibytes: %v", m.Address,contract)
-	c.DB.RegisterContract(contract)
+	err = c.DB.RegisterContract(contract)
+	if err!=nil{
+		logger.Error("Unable to register contract","Error",err)
+	}
 }
 
+
+// handler for label registration
 func (c *Controller) RegisterLabel(w http.ResponseWriter, r *http.Request) {
 	//c.DB.RegisterContract()
 }

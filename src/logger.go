@@ -1,15 +1,13 @@
 package src
 
 import (
-	logger "github.com/tendermint/tendermint/libs/log"
 	tmlog "github.com/tendermint/tendermint/libs/log"
+	"os"
 )
 
-var Logger logger.Logger
-
 // CheckpointLogger for checkpoint module logger
-var log tmlog.Logger
+var Logger tmlog.Logger
 
 func init() {
-	//log = Logger.With("module", "checkpoint")
+	Logger = tmlog.NewTMLogger(tmlog.NewSyncWriter(os.Stdout))
 }
