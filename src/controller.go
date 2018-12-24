@@ -13,8 +13,6 @@ type Controller struct {
 	DB DB
 }
 
-var controllerLogger = Logger.With("module", "controller")
-
 // handler for registrations (labels / contracts)
 func (c *Controller) Register(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
@@ -68,15 +66,31 @@ func (c *Controller) RegisterContract(w http.ResponseWriter, r *http.Request) {
 		Network: m.Network,
 		ABI:     abiBytes,
 	}
-	controllerLogger.Debug("Contract registration initiated", "Address", contract.Address, "Name", contract.Name, "Network", contract.Network)
+	ControllerLogger.Debug("Contract registration initiated", "Address", contract.Address, "Name", contract.Name, "Network", contract.Network)
 
 	err = c.DB.RegisterContract(contract)
 	if err != nil {
-		controllerLogger.Error("Unable to register contract", "Error", err)
+		ControllerLogger.Error("Unable to register contract", "Error", err)
 	}
 }
 
 // handler for label registration
 func (c *Controller) RegisterLabel(w http.ResponseWriter, r *http.Request) {
 	//c.DB.RegisterContract()
+}
+
+func (c *Controller) GetContracts(w http.ResponseWriter, r *http.Request){
+	contracts,err:=c.DB.GetContracts()
+	if err!=nil{
+		ControllerLogger.Error("Unable to get all contracts", "Error", err)
+	}
+	result, err := json.Marshal(&contracts)
+	if err != nil {
+		ControllerLogger.Error("Error while marshalling get contracts response", "error", err)
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
+		return
+	}
+	w.Write(result)
+
 }

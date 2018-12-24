@@ -6,7 +6,7 @@ import (
 
 type ContractObj struct {
 	Name    string `bson:"name"`
-	Address string `bson:"address`
+	Address string `bson:"contract_address"`
 	Network string `bson:"network"`
 	ABI     []byte `bson:"abi"`
 }

@@ -24,24 +24,12 @@ var routes = Routes{
 		"/register/{entity}",
 		controller.Register,
 	},
-	//Route{
-	//	"AddAlbum",
-	//	"POST",
-	//	"/",
-	//	controller.AddAlbum,
-	//},
-	//Route{
-	//	"UpdateAlbum",
-	//	"PUT",
-	//	"/",
-	//	controller.UpdateAlbum,
-	//},
-	//Route{
-	//	"DeleteAlbum",
-	//	"DELETE",
-	//	"/",
-	//	controller.DeleteAlbum,
-	//},
+	Route{
+		"GetContracts",
+		"GET",
+		"/contracts",
+		controller.GetContracts,
+	},
 }
 
 //NewRouter configures a new router to the API
