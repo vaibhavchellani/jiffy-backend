@@ -7,7 +7,6 @@ import (
 
 	"github.com/mongodb/mongo-go-driver/mongo/readpref"
 	"log"
-	"fmt"
 )
 
 type DB struct{}
@@ -74,6 +73,8 @@ func (DB *DB) GetContracts() (contracts []ContractObj,err error){
 		log.Fatal(err)
 		return contracts,err
 	}
-	fmt.Printf("contracts %v",contracts)
 	return contracts,nil
+}
+func (DB *DB) GetContract() (contract []ContractObj,err error) {
+	return contract,nil
 }

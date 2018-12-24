@@ -30,6 +30,12 @@ var routes = Routes{
 		"/contracts",
 		controller.GetContracts,
 	},
+	Route{
+		"GetContract",
+		"GET",
+		"/contract",
+		controller.GetContract,
+	},
 }
 
 //NewRouter configures a new router to the API

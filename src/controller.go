@@ -91,6 +91,20 @@ func (c *Controller) GetContracts(w http.ResponseWriter, r *http.Request){
 		w.Write([]byte(err.Error()))
 		return
 	}
+	ControllerLogger.Info("Successfully fetched all contracts","Result",result)
+	w.Write(result)
+}
+
+func (c *Controller) GetContract(w http.ResponseWriter, r *http.Request) {
+	conrtact,err:=c.DB.GetContract()
+	result, err := json.Marshal(&conrtact)
+	if err != nil {
+		ControllerLogger.Error("Error while marshalling get contract response", "error", err)
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
+		return
+	}
+	ControllerLogger.Info("Successfully fetched contract","Result",result)
 	w.Write(result)
 
 }
