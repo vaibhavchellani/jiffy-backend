@@ -10,10 +10,10 @@ import (
 
 type DB struct{}
 
+var dblogger = Logger.With("module", "database")
+
 // establishes connection with mongodb
 func EstablishConnection() (client *mongo.Client, err error) {
-	var dblogger = Logger.With("module", "database")
-
 	connectionCtx, _ := context.WithTimeout(context.Background(), 1*time.Second)
 	client, err = mongo.Connect(connectionCtx, SERVER)
 	if err != nil {
@@ -33,8 +33,6 @@ func EstablishConnection() (client *mongo.Client, err error) {
 
 // registers a contract
 func (db *DB) RegisterContract(contract ContractObj) error {
-	var dblogger = Logger.With("module", "database")
-
 	client, err := EstablishConnection()
 	if err != nil {
 		return err

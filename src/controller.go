@@ -13,6 +13,8 @@ type Controller struct {
 	DB DB
 }
 
+var controllerLogger = Logger.With("module", "controller")
+
 // handler for registrations (labels / contracts)
 func (c *Controller) Register(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
@@ -37,7 +39,6 @@ type ContractInput struct {
 
 // handler for contract registration
 func (c *Controller) RegisterContract(w http.ResponseWriter, r *http.Request) {
-	var logger = Logger.With("module", "controller")
 
 	var m ContractInput
 	body, err := ioutil.ReadAll(r.Body)
@@ -54,9 +55,7 @@ func (c *Controller) RegisterContract(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO validate address
-
-	abiBytes, err := json.Marshal(m.ABI)
+	abiBytes,err:=MarshallABI(m.ABI)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error()))
@@ -69,11 +68,11 @@ func (c *Controller) RegisterContract(w http.ResponseWriter, r *http.Request) {
 		Network: m.Network,
 		ABI:     abiBytes,
 	}
-	logger.Debug("Registering contract .....", "Address", contract.Address, "Name", contract.Name, "Network", contract.Network)
+	controllerLogger.Debug("Contract registration initiated", "Address", contract.Address, "Name", contract.Name, "Network", contract.Network)
 
 	err = c.DB.RegisterContract(contract)
 	if err != nil {
-		logger.Error("Unable to register contract", "Error", err)
+		controllerLogger.Error("Unable to register contract", "Error", err)
 	}
 }
 
