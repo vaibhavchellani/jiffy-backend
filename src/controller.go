@@ -2,11 +2,12 @@ package src
 
 import (
 	"encoding/json"
+	"io/ioutil"
+	"net/http"
+
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
-	"io/ioutil"
-	"net/http"
 )
 
 type Controller struct {
@@ -53,7 +54,7 @@ func (c *Controller) RegisterContract(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	abiBytes,err:=MarshallABI(m.ABI)
+	abiBytes, err := MarshallABI(m.ABI)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error()))
@@ -79,9 +80,9 @@ func (c *Controller) RegisterLabel(w http.ResponseWriter, r *http.Request) {
 	//c.DB.RegisterContract()
 }
 
-func (c *Controller) GetContracts(w http.ResponseWriter, r *http.Request){
-	contracts,err:=c.DB.GetContracts()
-	if err!=nil{
+func (c *Controller) GetContracts(w http.ResponseWriter, r *http.Request) {
+	contracts, err := c.DB.GetContracts()
+	if err != nil {
 		ControllerLogger.Error("Unable to get all contracts", "Error", err)
 	}
 	result, err := json.Marshal(&contracts)
@@ -91,12 +92,12 @@ func (c *Controller) GetContracts(w http.ResponseWriter, r *http.Request){
 		w.Write([]byte(err.Error()))
 		return
 	}
-	ControllerLogger.Info("Successfully fetched all contracts","Result",result)
+	ControllerLogger.Info("Successfully fetched all contracts", "Result", result)
 	w.Write(result)
 }
 
 func (c *Controller) GetContract(w http.ResponseWriter, r *http.Request) {
-	conrtact,err:=c.DB.GetContract()
+	conrtact, err := c.DB.GetContract()
 	result, err := json.Marshal(&conrtact)
 	if err != nil {
 		ControllerLogger.Error("Error while marshalling get contract response", "error", err)
@@ -104,7 +105,7 @@ func (c *Controller) GetContract(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(err.Error()))
 		return
 	}
-	ControllerLogger.Info("Successfully fetched contract","Result",result)
+	ControllerLogger.Info("Successfully fetched contract", "Result", result)
 	w.Write(result)
 
 }
