@@ -38,7 +38,6 @@ type ContractInput struct {
 
 // handler for contract registration
 func (c *Controller) RegisterContract(w http.ResponseWriter, r *http.Request) {
-
 	var m ContractInput
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -73,6 +72,14 @@ func (c *Controller) RegisterContract(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		ControllerLogger.Error("Unable to register contract", "Error", err)
 	}
+	result, err := json.Marshal(map[string]interface{}{"status": "Success"})
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write([]byte(result))
 }
 
 // handler for label registration
@@ -93,12 +100,22 @@ func (c *Controller) GetContracts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	ControllerLogger.Info("Successfully fetched all contracts", "Result", result)
+	w.Header().Set("Content-Type", "application/json")
 	w.Write(result)
 }
 
+// get a contract by name
 func (c *Controller) GetContract(w http.ResponseWriter, r *http.Request) {
-	conrtact, err := c.DB.GetContract()
-	result, err := json.Marshal(&conrtact)
+	vars := mux.Vars(r)
+	name := vars["name"]
+
+	contract, err := c.DB.GetContract(name)
+	if err!=nil{
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	result, err := json.Marshal(&contract)
 	if err != nil {
 		ControllerLogger.Error("Error while marshalling get contract response", "error", err)
 		w.WriteHeader(http.StatusBadRequest)
@@ -106,6 +123,6 @@ func (c *Controller) GetContract(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	ControllerLogger.Info("Successfully fetched contract", "Result", result)
+	w.Header().Set("Content-Type", "application/json")
 	w.Write(result)
-
 }

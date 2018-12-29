@@ -1,8 +1,9 @@
 package src
 
 import (
-	"github.com/gorilla/mux"
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
 // Route defines a route
@@ -33,7 +34,7 @@ var routes = Routes{
 	Route{
 		"GetContract",
 		"GET",
-		"/contract",
+		"/contract/{name}",
 		controller.GetContract,
 	},
 }

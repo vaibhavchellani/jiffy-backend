@@ -9,6 +9,8 @@ import (
 	"log"
 
 	"github.com/mongodb/mongo-go-driver/mongo/readpref"
+	"github.com/mongodb/mongo-go-driver/x/bsonx"
+	"github.com/mongodb/mongo-go-driver/bson"
 )
 
 type DB struct{}
@@ -43,7 +45,7 @@ func (DB *DB) RegisterContract(contract ContractObj) error {
 	if err != nil {
 		return err
 	}
-	DBLogger.Info("Successfully added new contract", "Address", contract.Address, "Name", contract.Name, "ID", res.InsertedID)
+	DBLogger.Info("Successfully added new contract", "Contract",contract.String() , "ID", res.InsertedID)
 	return nil
 }
 
@@ -78,6 +80,27 @@ func (DB *DB) GetContracts() (contracts []ContractObj, err error) {
 	}
 	return contracts, nil
 }
-func (DB *DB) GetContract() (contract []ContractObj, err error) {
+func (DB *DB) GetContract(name string) (contract ContractObj, err error) {
+	client, err := DB.DBConnect()
+	if err != nil {
+		log.Fatal(err)
+		return contract, err
+	}
+
+	DBLogger.Debug("Searching contract","name",name)
+	contractsInstance := client.Database(DBNAME).Collection(ContractCollection)
+	ctx, _ := context.WithTimeout(context.Background(), 2*time.Second)
+	var f bsonx.Doc
+	f.Set("name",bsonx.String(name))
+	filter := bson.D{{"name", name}}
+
+	err = contractsInstance.FindOne(ctx,filter).Decode(&contract)
+	if err!=nil{
+		DBLogger.Error("Unable to get contract","Name",name,"Error",err)
+
+	}
+
+	DBLogger.Info("Fetched contract","Contract",contract.String())
+
 	return contract, nil
 }
