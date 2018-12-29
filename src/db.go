@@ -8,8 +8,9 @@ import (
 
 	"log"
 
-	"github.com/mongodb/mongo-go-driver/mongo/readpref"
 	"github.com/mongodb/mongo-go-driver/bson"
+	"github.com/mongodb/mongo-go-driver/mongo/readpref"
+	"strings"
 )
 
 type DB struct{}
@@ -44,7 +45,7 @@ func (DB *DB) RegisterContract(contract ContractObj) error {
 	if err != nil {
 		return err
 	}
-	DBLogger.Info("Successfully added new contract", "Contract",contract.String() , "ID", res.InsertedID)
+	DBLogger.Info("Successfully added new contract", "Contract", contract.String(), "ID", res.InsertedID)
 	return nil
 }
 
@@ -84,29 +85,58 @@ func (DB *DB) GetContracts() (contracts []ContractObj, err error) {
 	}
 	return contracts, nil
 }
-func (DB *DB) GetContract(name string) (contract ContractObj, err error) {
+
+// get a contract by name
+func (DB *DB) GetContractViaName(name string) (contract ContractObj, err error) {
 	// connect to DB
 	client, err := DB.DBConnect()
 	if err != nil {
-		DBLogger.Error("Unable to connect to DB","Error",err)
+		DBLogger.Error("Unable to connect to DB", "Error", err)
 		panic(err)
 	}
 
-	DBLogger.Debug("Searching contract","name",name)
+	DBLogger.Debug("Searching contract", "name", name)
 
 	// creating contract instance
 	contractsInstance := client.Database(DBNAME).Collection(ContractCollection)
 	ctx, _ := context.WithTimeout(context.Background(), 2*time.Second)
 
 	//filtering and getting from DB
-	filter := bson.D{{"name", name}}
-	err = contractsInstance.FindOne(ctx,filter).Decode(&contract)
-	if err!=nil{
-		DBLogger.Error("Unable to get contract","Name",name,"Error",err)
-		return contract,err
+	filter := bson.D{{"queryable_name", strings.ToLower(name)}}
+	err = contractsInstance.FindOne(ctx, filter).Decode(&contract)
+	if err != nil {
+		DBLogger.Error("Unable to get contract", "Name", name, "Error", err)
+		return contract, err
 	}
 
-	DBLogger.Info("Fetched contract","Contract",contract.String())
+	DBLogger.Info("Fetched contract", "Contract", contract.String())
+
+	return contract, nil
+}
+
+// get a contract by address
+func (DB *DB) GetContractViaAddr(addr string) (contract ContractObj, err error) {
+	// connect to DB
+	client, err := DB.DBConnect()
+	if err != nil {
+		DBLogger.Error("Unable to connect to DB", "Error", err)
+		panic(err)
+	}
+	DBLogger.Debug("Searching contract", "Address", addr)
+
+	// creating contract instance
+	contractsInstance := client.Database(DBNAME).Collection(ContractCollection)
+	ctx, _ := context.WithTimeout(context.Background(), 2*time.Second)
+
+	//filtering and getting from DB
+	filter := bson.D{{"address", addr}}
+	err = contractsInstance.FindOne(ctx, filter).Decode(&contract)
+	if err != nil {
+		DBLogger.Error("Unable to get contract", "Address", addr, "Error", err)
+		return contract, err
+	}
+
+	DBLogger.Info("Fetched contract", "Contract", contract.String())
 
 	return contract, nil
 }

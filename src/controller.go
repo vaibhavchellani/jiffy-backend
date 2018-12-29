@@ -6,8 +6,10 @@ import (
 	"net/http"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
+	"strings"
 )
 
 type Controller struct {
@@ -59,13 +61,15 @@ func (c *Controller) RegisterContract(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(err.Error()))
 		return
 	}
-
+	// convert address/name to lowercase to simplify search
 	contract := ContractObj{
-		Name:    m.Name,
-		Address: m.Address,
-		Network: m.Network,
-		ABI:     abiBytes,
+		Name:      m.Name,
+		Address:   strings.ToLower(m.Address),
+		Network:   m.Network,
+		ABI:       abiBytes,
+		QueryName: strings.ToLower(m.Name),
 	}
+
 	ControllerLogger.Debug("Contract registration initiated", "Address", contract.Address, "Name", contract.Name, "Network", contract.Network)
 
 	err = c.DB.RegisterContract(contract)
@@ -106,15 +110,27 @@ func (c *Controller) GetContracts(w http.ResponseWriter, r *http.Request) {
 
 // get a contract by name
 func (c *Controller) GetContract(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	name := vars["name"]
-
-	contract, err := c.DB.GetContract(name)
-	if err!=nil{
-		w.WriteHeader(http.StatusNotFound)
-		return
+	//vars := mux.Vars(r)
+	//name := vars["name"]
+	// filter contract by name/address
+	filter := r.FormValue("filter")
+	var contract ContractObj
+	var err error
+	// if filter is an address get contract by address else by name
+	if common.IsHexAddress(filter) {
+		contract, err = c.DB.GetContractViaAddr(filter)
+		if err != nil {
+			// TODO match err and sent respective status
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+	} else {
+		contract, err = c.DB.GetContractViaName(filter)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
 	}
-
 	result, err := json.Marshal(&contract)
 	if err != nil {
 		ControllerLogger.Error("Error while marshalling get contract response", "error", err)

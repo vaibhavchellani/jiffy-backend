@@ -3,6 +3,7 @@ package src
 import (
 	"net/http"
 
+	"fmt"
 	"github.com/gorilla/mux"
 )
 
@@ -12,6 +13,7 @@ type Route struct {
 	Method      string
 	Pattern     string
 	HandlerFunc http.HandlerFunc
+	Queries     string
 }
 
 // Routes defines the list of routes of our API
@@ -24,18 +26,21 @@ var routes = Routes{
 		"POST",
 		"/register/{entity}",
 		controller.Register,
+		"",
 	},
 	Route{
 		"GetContracts",
 		"GET",
 		"/contracts",
 		controller.GetContracts,
+		"",
 	},
 	Route{
 		"GetContract",
 		"GET",
-		"/contract/{name}",
+		"/contract",
 		controller.GetContract,
+		"filter",
 	},
 }
 
@@ -45,12 +50,16 @@ func NewRouter() *mux.Router {
 	for _, route := range routes {
 		var handler http.Handler
 		handler = route.HandlerFunc
-
 		router.
 			Methods(route.Method).
 			Path(route.Pattern).
 			Name(route.Name).
 			Handler(handler)
+		if route.Queries != "" {
+			router.Queries(route.Queries, "{"+route.Queries+"}")
+			fmt.Printf("adding new query %v", route)
+
+		}
 	}
 	return router
 }

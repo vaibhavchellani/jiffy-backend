@@ -1,19 +1,20 @@
 package src
 
 import (
-	"github.com/ethereum/go-ethereum/common"
 	"fmt"
+	"github.com/ethereum/go-ethereum/common"
 )
 
 type ContractObj struct {
-	Name    string `bson:"name"`
-	Address string `bson:"contract_address"`
-	Network string `bson:"network"`
-	ABI     []byte `bson:"abi"`
+	Name      string `bson:"name"`
+	Address   string `bson:"contract_address"`
+	Network   string `bson:"network"`
+	ABI       []byte `bson:"abi"`
+	QueryName string `bson:"queryable_name"`
 }
 
 func (c *ContractObj) String() string {
-	result:= fmt.Sprintf("Contract--> name: %v addr: %v chain: %v",c.Name,c.Address,c.Network)
+	result := fmt.Sprintf("Contract--> name: %v addr: %v chain: %v", c.Name, c.Address, c.Network)
 	return result
 }
 
