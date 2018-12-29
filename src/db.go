@@ -9,7 +9,6 @@ import (
 	"log"
 
 	"github.com/mongodb/mongo-go-driver/mongo/readpref"
-	"github.com/mongodb/mongo-go-driver/x/bsonx"
 	"github.com/mongodb/mongo-go-driver/bson"
 )
 
@@ -50,20 +49,25 @@ func (DB *DB) RegisterContract(contract ContractObj) error {
 }
 
 func (DB *DB) GetContracts() (contracts []ContractObj, err error) {
+	// connecting to DB
 	client, err := DB.DBConnect()
 	if err != nil {
 		log.Fatal(err)
 		return contracts, err
 	}
 
+	// creating contract instance
 	contractsInstance := client.Database(DBNAME).Collection(ContractCollection)
 	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
+
+	// searching database
 	cur, err := contractsInstance.Find(ctx, nil)
 	if err != nil {
 		log.Fatal(err)
 		return contracts, err
 	}
 
+	// iterating over cursor to append to slice of contracts
 	defer cur.Close(ctx)
 	for cur.Next(ctx) {
 		var contract ContractObj
@@ -81,23 +85,25 @@ func (DB *DB) GetContracts() (contracts []ContractObj, err error) {
 	return contracts, nil
 }
 func (DB *DB) GetContract(name string) (contract ContractObj, err error) {
+	// connect to DB
 	client, err := DB.DBConnect()
 	if err != nil {
-		log.Fatal(err)
-		return contract, err
+		DBLogger.Error("Unable to connect to DB","Error",err)
+		panic(err)
 	}
 
 	DBLogger.Debug("Searching contract","name",name)
+
+	// creating contract instance
 	contractsInstance := client.Database(DBNAME).Collection(ContractCollection)
 	ctx, _ := context.WithTimeout(context.Background(), 2*time.Second)
-	var f bsonx.Doc
-	f.Set("name",bsonx.String(name))
-	filter := bson.D{{"name", name}}
 
+	//filtering and getting from DB
+	filter := bson.D{{"name", name}}
 	err = contractsInstance.FindOne(ctx,filter).Decode(&contract)
 	if err!=nil{
 		DBLogger.Error("Unable to get contract","Name",name,"Error",err)
-
+		return contract,err
 	}
 
 	DBLogger.Info("Fetched contract","Contract",contract.String())
