@@ -3,7 +3,6 @@ package src
 import (
 	"net/http"
 
-	"fmt"
 	"github.com/gorilla/mux"
 )
 
@@ -57,8 +56,6 @@ func NewRouter() *mux.Router {
 			Handler(handler)
 		if route.Queries != "" {
 			router.Queries(route.Queries, "{"+route.Queries+"}")
-			fmt.Printf("adding new query %v", route)
-
 		}
 	}
 	return router
