@@ -11,3 +11,15 @@ Jiffy backend will store contract addresses, ABI's ,recorded labels for register
 - Assigning jiffy subdomains to contract
 - Transactions and calls sorted per contract address
 - Transaction/Call per label id
+
+## Installation Instructions 
+
+```bash
+$ dep ensure -v
+```
+
+## Run server 
+
+```bash
+$ go run main.go
+```
