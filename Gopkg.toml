@@ -40,3 +40,7 @@
 [[constraint]]
   name = "github.com/ethereum/go-ethereum"
   version = "v1.8.17"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/globalsign/mgo"
