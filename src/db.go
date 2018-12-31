@@ -43,7 +43,7 @@ func (DB *DB) RegisterContract(contract ContractObj) error {
 	contractsInstance := client.Database(DBNAME).Collection(ContractCollection)
 	insertContext, _ := context.WithTimeout(context.Background(), 5*time.Second)
 	indexBuilder:=mongo.NewIndexOptionsBuilder()
-	indexBuilder.Unique(true)
+	indexBuilder.Unique(true).Build()
 	res, err := contractsInstance.InsertOne(insertContext, contract)
 	if err != nil {
 		return err
