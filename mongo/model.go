@@ -19,8 +19,6 @@ func (c *ContractObj) String() string {
 	return result
 }
 
-type Contracts []ContractObj
-
 type User struct {
 	Address common.Address `json:"user_address"`
 }

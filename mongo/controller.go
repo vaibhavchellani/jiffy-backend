@@ -37,6 +37,7 @@ type ContractInput struct {
 	Address string  `json:"address"`
 	Network string  `json:"network"`
 	ABI     abi.ABI `json:"abi"`
+	Owner string `json:"owner"`
 }
 
 // handler for contract registration
@@ -48,20 +49,25 @@ func (c *Controller) RegisterContract(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(err.Error()))
 		return
 	}
-
 	err = json.Unmarshal(body, &m)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error()))
 		return
 	}
-
 	abiBytes, err := helper.MarshallABI(m.ABI)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error()))
 		return
 	}
+	if common.IsHexAddress(m.Address) && common.IsHexAddress(m.Owner){
+		err:= errors.New("Address is not valid ethereum address")
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
+		return
+	}
+
 	// convert address/name to lowercase to simplify search
 	contract := ContractObj{
 		Name:      m.Name,
@@ -69,6 +75,7 @@ func (c *Controller) RegisterContract(w http.ResponseWriter, r *http.Request) {
 		Network:   m.Network,
 		ABI:       abiBytes,
 		QueryName: strings.ToLower(m.Name),
+		Owner: strings.ToLower(m.Owner),
 	}
 
 	helper.ControllerLogger.Debug("Contract registration initiated", "Address", contract.Address, "Name", contract.Name, "Network", contract.Network)
@@ -114,22 +121,20 @@ func (c *Controller) GetContracts(w http.ResponseWriter, r *http.Request) {
 
 // get a contract by name
 func (c *Controller) GetContract(w http.ResponseWriter, r *http.Request) {
-	//vars := mux.Vars(r)
-	//name := vars["name"]
 	// filter contract by name/address
 	filter := r.FormValue("filter")
 	var contract ContractObj
 	var err error
 	// if filter is an address get contract by address else by name
 	if common.IsHexAddress(filter) {
-		contract, err = c.DB.GetContractViaAddr(filter)
+		contract, err = c.DB.GetContractByAddr(filter)
 		if err != nil {
 			// TODO match err and sent respective status
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
 	} else {
-		contract, err = c.DB.GetContractViaName(filter)
+		contract, err = c.DB.GetContractByName(filter)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			return
@@ -142,7 +147,6 @@ func (c *Controller) GetContract(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(err.Error()))
 		return
 	}
-	helper.ControllerLogger.Info("Successfully fetched contract", "Result", result)
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(result)
 }
