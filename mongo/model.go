@@ -12,7 +12,7 @@ type ContractObj struct {
 	ABI       []byte `bson:"abi"`
 	QueryName string `bson:"queryable_name"`
 	Owner     string `bson:"owner_address"`
-	URL string       `bson:"url"`
+	Hash [32]byte `bson:contract_hash`
 }
 
 func (c *ContractObj) String() string {

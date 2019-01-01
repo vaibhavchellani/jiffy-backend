@@ -13,7 +13,7 @@ type Route struct {
 	Method      string
 	Pattern     string
 	HandlerFunc http.HandlerFunc
-	Queries     string
+	Queries     []string
 }
 
 // Routes defines the list of routes of our API
@@ -26,30 +26,36 @@ var routes = Routes{
 		"POST",
 		"/register/{entity}",
 		controller.Register,
-		"",
+		[]string{},
 	},
 	Route{
 		"GetContracts",
 		"GET",
 		"/contracts",
 		controller.GetContracts,
-		"",
+		[]string{},
 	},
 	Route{
 		"GetContract",
 		"GET",
 		"/contract",
 		controller.GetContract,
-		"filter",
+		[]string{"filter"},
 	},
 	Route{
 		"GetDapp",
 		"GET",
 		"/{dapp_name}",
 		controller.GetDapp,
-		"",
+		[]string{},
 	},
-
+	Route{
+		"CheckExistence",
+		"GET",
+		"/exists",
+		controller.GetDapp,
+		[]string{"address","network"},
+	},
 }
 
 //NewRouter configures a new router to the API
@@ -63,8 +69,10 @@ func NewRouter() *mux.Router {
 			Path(route.Pattern).
 			Name(route.Name).
 			Handler(handler)
-		if route.Queries != "" {
-			router.Queries(route.Queries, "{"+route.Queries+"}")
+		if len(route.Queries)!=0 {
+			for _,query:= range route.Queries{
+				router.Queries(query, "{"+query+"}")
+			}
 		}
 	}
 	return router

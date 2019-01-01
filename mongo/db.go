@@ -24,6 +24,13 @@ func (DB *DB) RegisterContract(contract ContractObj) error {
 	return nil
 }
 
+// register label per contract
+func (DB *DB) RegisterLabel(name string) (err error) {
+
+	return nil
+}
+
+// get all contracts
 func (DB *DB) GetContracts() (contracts []ContractObj, err error) {
 	session, err := NewSession(helper.SERVER)
 	if err != nil {

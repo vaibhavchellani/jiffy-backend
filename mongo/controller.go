@@ -11,6 +11,7 @@ import (
 	"github.com/jiffy-backend/helper"
 	"github.com/pkg/errors"
 	"strings"
+	"crypto/sha256"
 )
 
 type Controller struct {
@@ -82,6 +83,7 @@ func (c *Controller) RegisterContract(w http.ResponseWriter, r *http.Request) {
 		ABI:       abiBytes,
 		QueryName: strings.ToLower(m.Name),
 		Owner:     strings.ToLower(m.Owner),
+		Hash:sha256.Sum256([]byte("lol")),
 	}
 
 	helper.ControllerLogger.Debug("Contract registration initiated", "Address", contract.Address, "Name", contract.Name, "Network", contract.Network)
@@ -105,9 +107,10 @@ func (c *Controller) RegisterContract(w http.ResponseWriter, r *http.Request) {
 
 // handler for label registration
 func (c *Controller) RegisterLabel(w http.ResponseWriter, r *http.Request) {
-	//c.DB.RegisterContract()
+	c.DB.RegisterContract()
 }
 
+// get all contracts
 func (c *Controller) GetContracts(w http.ResponseWriter, r *http.Request) {
 	contracts, err := c.DB.GetContracts()
 	if err != nil {
