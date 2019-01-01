@@ -1,23 +1,12 @@
 package mongo
 
 import (
-
 	"log"
 
-	"github.com/globalsign/mgo"
 	"github.com/jiffy-backend/helper"
 )
 
 type DB struct{}
-
-// establishes connection with mongodb
-func (DB *DB) DBConnect() (session *mgo.Session, err error) {
-	session,err =mgo.Dial(helper.SERVER)
-	if err != nil {
-		return session,err
-	}
-	return session, nil
-}
 
 // registers a contract
 func (DB *DB) RegisterContract(contract ContractObj) error {
@@ -26,9 +15,9 @@ func (DB *DB) RegisterContract(contract ContractObj) error {
 		log.Fatalf("Unable to connect to mongo: %s", err)
 	}
 	defer session.Close()
-	c:= NewContractService(session.Copy(),helper.DBNAME,helper.ContractCollection)
+	c := NewContractService(session.Copy(), helper.DBNAME, helper.ContractCollection)
 	err = c.Register(contract)
-	if err!=nil{
+	if err != nil {
 		return err
 	}
 	helper.DBLogger.Info("Successfully added new contract", "Contract", contract.String())
@@ -41,11 +30,11 @@ func (DB *DB) GetContracts() (contracts []ContractObj, err error) {
 		log.Fatalf("Unable to connect to mongo: %s", err)
 	}
 	defer session.Close()
-	c:= NewContractService(session.Copy(),helper.DBNAME,helper.ContractCollection)
-	err =c.GetAllContracts(&contracts)
-	if err!=nil{
-		helper.DBLogger.Error("Cannot fetch all contracts","Error",err)
-		return contracts,err
+	c := NewContractService(session.Copy(), helper.DBNAME, helper.ContractCollection)
+	err = c.GetAllContracts(&contracts)
+	if err != nil {
+		helper.DBLogger.Error("Cannot fetch all contracts", "Error", err)
+		return contracts, err
 	}
 	return contracts, nil
 }
@@ -57,13 +46,13 @@ func (DB *DB) GetContractByName(name string) (contract ContractObj, err error) {
 		log.Fatalf("Unable to connect to mongo: %s", err)
 	}
 	defer session.Close()
-	c:= NewContractService(session.Copy(),helper.DBNAME,helper.ContractCollection)
-	err = c.GetContractByName(&contract,name)
-	if err!=nil{
+	c := NewContractService(session.Copy(), helper.DBNAME, helper.ContractCollection)
+	err = c.GetContractByName(&contract, name)
+	if err != nil {
 		helper.DBLogger.Error("Unable to get contract", "Name", name, "Error", err)
-		return contract,err
+		return contract, err
 	}
-	helper.DBLogger.Info("Fetched contract", "Contract", contract.String(),"Name",name)
+	helper.DBLogger.Info("Fetched contract", "Contract", contract.String(), "Name", name)
 	return contract, nil
 }
 
@@ -74,11 +63,11 @@ func (DB *DB) GetContractByAddr(addr string) (contract ContractObj, err error) {
 		log.Fatalf("Unable to connect to mongo: %s", err)
 	}
 	defer session.Close()
-	c:= NewContractService(session.Copy(),helper.DBNAME,helper.ContractCollection)
-	err = c.GetContractByAddress(&contract,addr)
-	if err!=nil{
+	c := NewContractService(session.Copy(), helper.DBNAME, helper.ContractCollection)
+	err = c.GetContractByAddress(&contract, addr)
+	if err != nil {
 		helper.DBLogger.Error("Unable to get contract", "Address", addr, "Error", err)
-		return contract,err
+		return contract, err
 	}
 	helper.DBLogger.Info("Fetched contract", "Contract", contract.String())
 	return contract, nil

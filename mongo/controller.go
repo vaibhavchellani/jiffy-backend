@@ -8,9 +8,9 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/gorilla/mux"
+	"github.com/jiffy-backend/helper"
 	"github.com/pkg/errors"
 	"strings"
-	"github.com/jiffy-backend/helper"
 )
 
 type Controller struct {
@@ -37,7 +37,7 @@ type ContractInput struct {
 	Address string  `json:"address"`
 	Network string  `json:"network"`
 	ABI     abi.ABI `json:"abi"`
-	Owner string `json:"owner"`
+	Owner   string  `json:"owner"`
 }
 
 // handler for contract registration
@@ -61,12 +61,18 @@ func (c *Controller) RegisterContract(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(err.Error()))
 		return
 	}
-	if common.IsHexAddress(m.Address) && common.IsHexAddress(m.Owner){
-		err:= errors.New("Address is not valid ethereum address")
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(err.Error()))
-		return
-	}
+	//if common.IsHexAddress(m.Address) {
+	//	err := errors.New("Contract address is not valid ethereum address")
+	//	w.WriteHeader(http.StatusBadRequest)
+	//	w.Write([]byte(err.Error()))
+	//	return
+	//}
+	//if common.IsHexAddress(m.Owner) {
+	//	err := errors.New("Owner address is not valid ethereum address")
+	//	w.WriteHeader(http.StatusBadRequest)
+	//	w.Write([]byte(err.Error()))
+	//	return
+	//}
 
 	// convert address/name to lowercase to simplify search
 	contract := ContractObj{
@@ -75,7 +81,7 @@ func (c *Controller) RegisterContract(w http.ResponseWriter, r *http.Request) {
 		Network:   m.Network,
 		ABI:       abiBytes,
 		QueryName: strings.ToLower(m.Name),
-		Owner: strings.ToLower(m.Owner),
+		Owner:     strings.ToLower(m.Owner),
 	}
 
 	helper.ControllerLogger.Debug("Contract registration initiated", "Address", contract.Address, "Name", contract.Name, "Network", contract.Network)
@@ -150,3 +156,17 @@ func (c *Controller) GetContract(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(result)
 }
+
+// get dapp given dapp name and spit abi
+func (c *Controller) GetDapp(w http.ResponseWriter, r *http.Request){
+	vars := mux.Vars(r)
+	name := vars["dapp_name"]
+	contract,err:= c.DB.GetContractByName(name)
+	if err!=nil{
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(contract.ABI)
+}
+

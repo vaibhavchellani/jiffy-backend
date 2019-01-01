@@ -11,7 +11,8 @@ type ContractObj struct {
 	Network   string `bson:"network"`
 	ABI       []byte `bson:"abi"`
 	QueryName string `bson:"queryable_name"`
-	Owner string `bson:"owner_address"`
+	Owner     string `bson:"owner_address"`
+	URL string       `bson:"url"`
 }
 
 func (c *ContractObj) String() string {

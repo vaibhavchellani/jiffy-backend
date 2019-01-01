@@ -42,6 +42,14 @@ var routes = Routes{
 		controller.GetContract,
 		"filter",
 	},
+	Route{
+		"GetDapp",
+		"GET",
+		"/{dapp_name}",
+		controller.GetDapp,
+		"",
+	},
+
 }
 
 //NewRouter configures a new router to the API

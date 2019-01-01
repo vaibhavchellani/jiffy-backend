@@ -16,5 +16,5 @@ func init() {
 	Logger = tmlog.NewTMLogger(tmlog.NewSyncWriter(os.Stdout))
 	DBLogger = Logger.With("module", "database")
 	ControllerLogger = Logger.With("module", "controller")
-	MainLogger = Logger.With("module","main")
+	MainLogger = Logger.With("module", "main")
 }
