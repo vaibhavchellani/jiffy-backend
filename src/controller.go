@@ -75,6 +75,9 @@ func (c *Controller) RegisterContract(w http.ResponseWriter, r *http.Request) {
 	err = c.DB.RegisterContract(contract)
 	if err != nil {
 		ControllerLogger.Error("Unable to register contract", "Error", err)
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
+		return
 	}
 	result, err := json.Marshal(map[string]interface{}{"status": "Success"})
 	if err != nil {

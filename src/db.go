@@ -17,6 +17,17 @@ func (DB *DB) DBConnect() (session *mgo.Session, err error) {
 	if err != nil {
 		return session,err
 	}
+	c:=session.DB(DBNAME).C(ContractCollection)
+	index := mgo.Index{
+		Key: []string{"$text:name"},
+		Unique:true,
+	}
+	err = c.EnsureIndex(index)
+	if err != nil {
+		DBLogger.Error("index error")
+		return session,err
+	}
+
 	return session, nil
 }
 
@@ -28,11 +39,20 @@ func (DB *DB) RegisterContract(contract ContractObj) error {
 	}
 	defer session.Close()
 	c:=session.DB(DBNAME).C(ContractCollection)
+	//index := mgo.Index{
+	//	Key: []string{"$text:name"},
+	//	Unique:true,
+	//}
+	//err = c.EnsureIndex(index)
+	//if err != nil {
+	//	DBLogger.Error("index error")
+	//	return err
+	//}
 	err =c.Insert(contract)
 	if err!=nil{
 		return err
 	}
-	//DBLogger.Info("Successfully added new contract", "Contract", contract.String(), "ID", res.InsertedID)
+	DBLogger.Info("Successfully added new contract", "Contract", contract.String())
 	return nil
 }
 
