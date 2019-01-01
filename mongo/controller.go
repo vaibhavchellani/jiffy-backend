@@ -1,4 +1,4 @@
-package src
+package mongo
 
 import (
 	"encoding/json"
@@ -10,6 +10,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
 	"strings"
+	"github.com/jiffy-backend/helper"
 )
 
 type Controller struct {
@@ -55,7 +56,7 @@ func (c *Controller) RegisterContract(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	abiBytes, err := MarshallABI(m.ABI)
+	abiBytes, err := helper.MarshallABI(m.ABI)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error()))
@@ -70,11 +71,11 @@ func (c *Controller) RegisterContract(w http.ResponseWriter, r *http.Request) {
 		QueryName: strings.ToLower(m.Name),
 	}
 
-	ControllerLogger.Debug("Contract registration initiated", "Address", contract.Address, "Name", contract.Name, "Network", contract.Network)
+	helper.ControllerLogger.Debug("Contract registration initiated", "Address", contract.Address, "Name", contract.Name, "Network", contract.Network)
 
 	err = c.DB.RegisterContract(contract)
 	if err != nil {
-		ControllerLogger.Error("Unable to register contract", "Error", err)
+		helper.ControllerLogger.Error("Unable to register contract", "Error", err)
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error()))
 		return
@@ -97,16 +98,16 @@ func (c *Controller) RegisterLabel(w http.ResponseWriter, r *http.Request) {
 func (c *Controller) GetContracts(w http.ResponseWriter, r *http.Request) {
 	contracts, err := c.DB.GetContracts()
 	if err != nil {
-		ControllerLogger.Error("Unable to get all contracts", "Error", err)
+		helper.ControllerLogger.Error("Unable to get all contracts", "Error", err)
 	}
 	result, err := json.Marshal(&contracts)
 	if err != nil {
-		ControllerLogger.Error("Error while marshalling get contracts response", "error", err)
+		helper.ControllerLogger.Error("Error while marshalling get contracts response", "error", err)
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error()))
 		return
 	}
-	ControllerLogger.Info("Successfully fetched all contracts", "Result", result)
+	helper.ControllerLogger.Info("Successfully fetched all contracts", "Result", result)
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(result)
 }
@@ -136,12 +137,12 @@ func (c *Controller) GetContract(w http.ResponseWriter, r *http.Request) {
 	}
 	result, err := json.Marshal(&contract)
 	if err != nil {
-		ControllerLogger.Error("Error while marshalling get contract response", "error", err)
+		helper.ControllerLogger.Error("Error while marshalling get contract response", "error", err)
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error()))
 		return
 	}
-	ControllerLogger.Info("Successfully fetched contract", "Result", result)
+	helper.ControllerLogger.Info("Successfully fetched contract", "Result", result)
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(result)
 }

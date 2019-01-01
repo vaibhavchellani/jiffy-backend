@@ -5,11 +5,11 @@ import (
 	"net/http"
 
 	"fmt"
-	"github.com/jiffy-backend/src"
+	"github.com/jiffy-backend/server"
 )
 
 func main() {
-	r := src.NewRouter()
+	r := server.NewRouter()
 	// TODO fix walker
 	//fmt.Println("******Available Routes*******")
 	//r.Walk(func(route *mux.Route, router *mux.Router, ancestors []*mux.Route) error {
