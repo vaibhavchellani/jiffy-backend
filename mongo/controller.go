@@ -12,6 +12,7 @@ import (
 	"github.com/pkg/errors"
 	"strings"
 	"crypto/sha256"
+	"github.com/cosmos-sdk/client"
 )
 
 type Controller struct {
@@ -75,6 +76,8 @@ func (c *Controller) RegisterContract(w http.ResponseWriter, r *http.Request) {
 	//	return
 	//}
 
+	// TODO check if network is one of our allowed networks , put chainID in DB not string
+
 	// convert address/name to lowercase to simplify search
 	contract := ContractObj{
 		Name:      m.Name,
@@ -83,7 +86,7 @@ func (c *Controller) RegisterContract(w http.ResponseWriter, r *http.Request) {
 		ABI:       abiBytes,
 		QueryName: strings.ToLower(m.Name),
 		Owner:     strings.ToLower(m.Owner),
-		Hash:sha256.Sum256([]byte("lol")),
+		Identifier: helper.GenerateHash(m.Network,m.Address),
 	}
 
 	helper.ControllerLogger.Debug("Contract registration initiated", "Address", contract.Address, "Name", contract.Name, "Network", contract.Network)
@@ -107,7 +110,7 @@ func (c *Controller) RegisterContract(w http.ResponseWriter, r *http.Request) {
 
 // handler for label registration
 func (c *Controller) RegisterLabel(w http.ResponseWriter, r *http.Request) {
-	c.DB.RegisterContract()
+	//c.DB.RegisterContract()
 }
 
 // get all contracts
@@ -172,4 +175,16 @@ func (c *Controller) GetDapp(w http.ResponseWriter, r *http.Request){
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(contract.ABI)
 }
+
+func (c *Controller) CheckExistence(w http.ResponseWriter, r *http.Request){
+	addr := r.FormValue("address")
+	network:= r.FormValue("network")
+	hash:= helper.GenerateHash(network,addr)
+	contract,err:=c.DB.GetContractByIdentifier(hash)
+	if err!=nil{
+
+	}
+}
+
+
 

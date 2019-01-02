@@ -1,4 +1,4 @@
-package helper
+package config
 
 const (
 	SERVER             = "mongodb://localhost:27017" // SERVER the DB server

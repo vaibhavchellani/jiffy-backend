@@ -53,7 +53,7 @@ var routes = Routes{
 		"CheckExistence",
 		"GET",
 		"/exists",
-		controller.GetDapp,
+		controller.CheckExistence,
 		[]string{"address","network"},
 	},
 }

@@ -58,3 +58,11 @@ func (c *ContractService) GetContractByAddress(contract *ContractObj, address st
 	}
 	return nil
 }
+
+func (c *ContractService) GetContractByIdentifier(hash [32]byte,contract *ContractObj) (err error) {
+	err = c.collection.Find(bson.D{{"identifier", hash}}).One(&contract)
+	if err != nil {
+		return err
+	}
+	return nil
+}
