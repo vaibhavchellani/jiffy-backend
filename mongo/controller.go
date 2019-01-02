@@ -11,8 +11,6 @@ import (
 	"github.com/jiffy-backend/helper"
 	"github.com/pkg/errors"
 	"strings"
-	"crypto/sha256"
-	"github.com/cosmos-sdk/client"
 )
 
 type Controller struct {
@@ -98,7 +96,8 @@ func (c *Controller) RegisterContract(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(err.Error()))
 		return
 	}
-	result, err := json.Marshal(map[string]interface{}{"status": "Success"})
+
+	result, err := json.Marshal(map[string]interface{}{"status": "Success","Contract":contract.Json()})
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error()))
@@ -182,8 +181,18 @@ func (c *Controller) CheckExistence(w http.ResponseWriter, r *http.Request){
 	hash:= helper.GenerateHash(network,addr)
 	contract,err:=c.DB.GetContractByIdentifier(hash)
 	if err!=nil{
-
+		w.WriteHeader(http.StatusBadRequest)
+		return
 	}
+	result, err := json.Marshal(&contract)
+	if err != nil {
+		helper.ControllerLogger.Error("Error while marshalling get contract response", "error", err)
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(result)
 }
 
 
