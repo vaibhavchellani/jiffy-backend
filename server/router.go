@@ -43,18 +43,18 @@ var routes = Routes{
 		[]string{"filter"},
 	},
 	Route{
-		"GetDapp",
-		"GET",
-		"/{dapp_name}",
-		controller.GetDapp,
-		[]string{},
-	},
-	Route{
 		"CheckExistence",
 		"GET",
 		"/exists",
 		controller.CheckExistence,
 		[]string{"address","network"},
+	},
+	Route{
+		"GetDapp",
+		"GET",
+		"/{dapp_name}",
+		controller.GetDapp,
+		[]string{},
 	},
 }
 

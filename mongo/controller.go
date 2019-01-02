@@ -11,6 +11,7 @@ import (
 	"github.com/jiffy-backend/helper"
 	"github.com/pkg/errors"
 	"strings"
+	"encoding/hex"
 )
 
 type Controller struct {
@@ -179,11 +180,15 @@ func (c *Controller) CheckExistence(w http.ResponseWriter, r *http.Request){
 	addr := r.FormValue("address")
 	network:= r.FormValue("network")
 	hash:= helper.GenerateHash(network,addr)
+
+	helper.ControllerLogger.Debug("Generated hash for input","hash",hex.EncodeToString(hash[:]),"Address",addr,"Network",network)
+
 	contract,err:=c.DB.GetContractByIdentifier(hash)
 	if err!=nil{
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
+
 	result, err := json.Marshal(&contract)
 	if err != nil {
 		helper.ControllerLogger.Error("Error while marshalling get contract response", "error", err)
@@ -191,6 +196,7 @@ func (c *Controller) CheckExistence(w http.ResponseWriter, r *http.Request){
 		w.Write([]byte(err.Error()))
 		return
 	}
+
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(result)
 }
