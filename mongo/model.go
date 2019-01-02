@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"github.com/ethereum/go-ethereum/common"
 	"encoding/hex"
+	"github.com/jiffy-backend/helper"
+	abi "github.com/ethereum/go-ethereum/accounts/abi"
 )
 
 type ContractObj struct {
@@ -25,18 +27,20 @@ type contractObjJson struct{
 	Name      string `json:"name"`
 	Address   string `json:"contract_address"`
 	Network   string `json:"network"`
-	ABI       []byte `json:"abi"`
+	ABI       abi.ABI `json:"abi"`
 	Owner     string `json:"owner_address"`
 	Identifier string `json:contract_hash`
 }
 
 func (c *ContractObj) Json() (contractObjJson) {
 	identifier:=hex.EncodeToString(c.Identifier[:])
+	var abi abi.ABI
+	helper.UnMarshallABI(c.ABI,&abi)
 	contract:=contractObjJson{
 		Name:c.Name,
 		Address:c.Address,
 		Network:c.Network,
-		ABI:c.ABI,
+		ABI:abi,
 		Owner:c.Owner,
 		Identifier:identifier,
 	}

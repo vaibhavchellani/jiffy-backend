@@ -11,7 +11,6 @@ import (
 	"github.com/jiffy-backend/helper"
 	"github.com/pkg/errors"
 	"strings"
-	"encoding/hex"
 )
 
 type Controller struct {
@@ -62,6 +61,12 @@ func (c *Controller) RegisterContract(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(err.Error()))
 		return
 	}
+	var newAbi abi.ABI
+	//helper.UnMarshallABI(abiBytes,&newAbi)
+	if err:=newAbi.UnmarshalJSON(abiBytes) ; err!=nil{
+		helper.ControllerLogger.Error("unable to unmarshall")
+	}
+	helper.ControllerLogger.Debug("new abi","bytes",abiBytes,"unmae",newAbi.UnmarshalJSON(abiBytes),"Inp",m.ABI)
 	//if common.IsHexAddress(m.Address) {
 	//	err := errors.New("Contract address is not valid ethereum address")
 	//	w.WriteHeader(http.StatusBadRequest)
@@ -181,15 +186,13 @@ func (c *Controller) CheckExistence(w http.ResponseWriter, r *http.Request){
 	network:= r.FormValue("network")
 	hash:= helper.GenerateHash(network,addr)
 
-	helper.ControllerLogger.Debug("Generated hash for input","hash",hex.EncodeToString(hash[:]),"Address",addr,"Network",network)
-
 	contract,err:=c.DB.GetContractByIdentifier(hash)
 	if err!=nil{
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	result, err := json.Marshal(&contract)
+	result, err := json.Marshal(map[string]interface{}{"status": "Success","Contract":contract.Json()})
 	if err != nil {
 		helper.ControllerLogger.Error("Error while marshalling get contract response", "error", err)
 		w.WriteHeader(http.StatusBadRequest)

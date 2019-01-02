@@ -15,8 +15,8 @@ func MarshallABI(abi abi.ABI) ([]byte, error) {
 	return abiBytes, nil
 }
 
-func UnMarshallABI(abiBytes []byte, abi abi.ABI) error {
-	err := json.Unmarshal(abiBytes, &abi)
+func UnMarshallABI(abiBytes []byte, abi *abi.ABI) error {
+	err := json.Unmarshal(abiBytes, abi)
 	if err != nil {
 		return err
 	}
@@ -24,6 +24,6 @@ func UnMarshallABI(abiBytes []byte, abi abi.ABI) error {
 }
 
 func GenerateHash(network string,address string) ([32]byte)  {
-	identifier :=fmt.Sprintf(network,address )
+	identifier :=fmt.Sprintf(network,address)
 	return sha256.Sum256([]byte(identifier))
 }
