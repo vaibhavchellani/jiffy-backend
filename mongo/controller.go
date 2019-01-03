@@ -41,6 +41,8 @@ type ContractInput struct {
 	Owner   string  `json:"owner"`
 }
 
+
+// TODO make sure name doesnt match with existing routes
 // handler for contract registration
 func (c *Controller) RegisterContract(w http.ResponseWriter, r *http.Request) {
 	var m ContractInput
