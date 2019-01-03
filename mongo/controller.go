@@ -11,6 +11,7 @@ import (
 	"github.com/jiffy-backend/helper"
 	"github.com/pkg/errors"
 	"strings"
+	"github.com/jiffy-backend/server"
 )
 
 type Controller struct {
@@ -66,6 +67,7 @@ func (c *Controller) RegisterContract(w http.ResponseWriter, r *http.Request) {
 	if err:=newAbi.UnmarshalJSON(abiBytes) ; err!=nil{
 		helper.ControllerLogger.Error("unable to unmarshall")
 	}
+	// TODO figure out a way to save abi and reproduce the same
 	helper.ControllerLogger.Debug("new abi","bytes",abiBytes,"unmae",newAbi.UnmarshalJSON(abiBytes),"Inp",m.ABI)
 	//if common.IsHexAddress(m.Address) {
 	//	err := errors.New("Contract address is not valid ethereum address")
@@ -192,16 +194,8 @@ func (c *Controller) CheckExistence(w http.ResponseWriter, r *http.Request){
 		return
 	}
 
-	result, err := json.Marshal(map[string]interface{}{"status": "Success","Contract":contract.Json()})
-	if err != nil {
-		helper.ControllerLogger.Error("Error while marshalling get contract response", "error", err)
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(err.Error()))
-		return
-	}
+	server.JsonResponse(w,http.StatusOK,map[string]interface{}{"status": "Success","Contract":contract.Json()})
 
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(result)
 }
 
 
