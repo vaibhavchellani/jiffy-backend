@@ -1,9 +1,8 @@
 package mongo
 
 import (
-	"encoding/hex"
 	"fmt"
-	abi "github.com/ethereum/go-ethereum/accounts/abi"
+	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/jiffy-backend/helper"
 )
@@ -16,7 +15,7 @@ type ContractObj struct {
 	ABI         []byte   `bson:"abi"`
 	QueryName   string   `bson:"queryable_name"`
 	Owner       string   `bson:"owner_address"`
-	Identifier  [32]byte `bson:"contract_hash"`
+	Identifier  string `bson:"contract_hash"`
 	NetworkURL  string   `bson:"network_url"`
 }
 
@@ -37,7 +36,7 @@ type ContractObjJson struct {
 	NetworkURL  string   `json:"network_url"`
 }
 func (c *ContractObj) Json() ContractObjJson {
-	identifier := hex.EncodeToString(c.Identifier[:])
+	//identifier := hex.EncodeToString(c.Identifier[:])
 	var abi abi.ABI
 	helper.UnMarshallABI(c.ABI, &abi)
 	contract := ContractObjJson{
@@ -46,7 +45,7 @@ func (c *ContractObj) Json() ContractObjJson {
 		NetworkName:    c.NetworkName,
 		ABI:        abi,
 		Owner:      c.Owner,
-		Identifier: identifier,
+		Identifier: c.Identifier,
 		NetworkURL:c.NetworkURL,
 	}
 	return contract

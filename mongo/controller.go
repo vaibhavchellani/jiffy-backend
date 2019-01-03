@@ -47,20 +47,20 @@ func (c *Controller) RegisterContract(w http.ResponseWriter, r *http.Request) {
 	var m ContractInput
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(err.Error()))
+		helper.Error(w,http.StatusBadRequest,err.Error())
+
 		return
 	}
 	err = json.Unmarshal(body, &m)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(err.Error()))
+		helper.Error(w,http.StatusBadRequest,err.Error())
+
 		return
 	}
 	abiBytes, err := helper.MarshallABI(m.ABI)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(err.Error()))
+		helper.Error(w,http.StatusBadRequest,err.Error())
+
 		return
 	}
 
@@ -76,11 +76,13 @@ func (c *Controller) RegisterContract(w http.ResponseWriter, r *http.Request) {
 
 	name, err := helper.GetNetworkDetails(m.Network)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(err.Error()))
+		helper.Error(w,http.StatusBadRequest,err.Error())
+
 		return
 	}
 
+	contractHash:=helper.GenerateHash(name,m.Address)
+	contractHashStr:=hex.EncodeToString(contractHash[:])
 	// convert address/name to lowercase to simplify search
 	contract := ContractObj{
 		Name:        m.Name,
@@ -89,11 +91,11 @@ func (c *Controller) RegisterContract(w http.ResponseWriter, r *http.Request) {
 		ABI:         abiBytes,
 		QueryName:   strings.ToLower(m.Name),
 		Owner:       strings.ToLower(m.Owner),
-		Identifier:  helper.GenerateHash(name,m.Address),
+		Identifier:  contractHashStr,
 		NetworkURL:  m.Network,
 	}
 
-	helper.ControllerLogger.Debug("hash generated","hash",hex.EncodeToString(contract.Identifier[:]))
+	helper.ControllerLogger.Debug("hash generated","hash",contractHashStr)
 	if err:=contract.ValidateBasic(); err!=nil {
 		// add error
 		return
@@ -104,19 +106,13 @@ func (c *Controller) RegisterContract(w http.ResponseWriter, r *http.Request) {
 	err = c.DB.RegisterContract(contract)
 	if err != nil {
 		helper.ControllerLogger.Error("Unable to register contract", "Error", err)
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(err.Error()))
+		helper.Error(w,http.StatusBadRequest,err.Error())
+
 		return
 	}
 
-	result, err := json.Marshal(map[string]interface{}{"status": "Success", "Contract": contract.Json()})
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(err.Error()))
-		return
-	}
-	w.Header().Set("Content-Type", "application/json")
-	w.Write([]byte(result))
+	helper.JsonResponse(w, http.StatusOK, map[string]interface{}{"status": "Success", "Contract": contract.Json()})
+
 }
 
 // handler for label registration
@@ -129,17 +125,9 @@ func (c *Controller) GetContracts(w http.ResponseWriter, r *http.Request) {
 	contracts, err := c.DB.GetContracts()
 	if err != nil {
 		helper.ControllerLogger.Error("Unable to get all contracts", "Error", err)
+		helper.Error(w,http.StatusBadRequest,err.Error())
 	}
-	result, err := json.Marshal(&contracts)
-	if err != nil {
-		helper.ControllerLogger.Error("Error while marshalling get contracts response", "error", err)
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(err.Error()))
-		return
-	}
-	helper.ControllerLogger.Info("Successfully fetched all contracts", "Result", result)
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(result)
+	helper.JsonResponse(w, http.StatusOK, map[string]interface{}{"status": "Success", "Contract": contracts})
 }
 
 // get a contract by name
@@ -153,25 +141,18 @@ func (c *Controller) GetContract(w http.ResponseWriter, r *http.Request) {
 		contract, err = c.DB.GetContractByAddr(filter)
 		if err != nil {
 			// TODO match err and sent respective status
-			w.WriteHeader(http.StatusBadRequest)
+			helper.Error(w,http.StatusBadRequest,err.Error())
 			return
 		}
 	} else {
 		contract, err = c.DB.GetContractByName(filter)
 		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
+			helper.Error(w,http.StatusBadRequest,err.Error())
 			return
 		}
 	}
-	result, err := json.Marshal(&contract)
-	if err != nil {
-		helper.ControllerLogger.Error("Error while marshalling get contract response", "error", err)
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(err.Error()))
-		return
-	}
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(result)
+
+	helper.JsonResponse(w, http.StatusOK, map[string]interface{}{"status": "Success", "Contract": contract})
 }
 
 // get dapp given dapp name and spit abi
@@ -180,21 +161,20 @@ func (c *Controller) GetDapp(w http.ResponseWriter, r *http.Request) {
 	name := vars["dapp_name"]
 	contract, err := c.DB.GetContractByName(name)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+		helper.Error(w,http.StatusBadRequest,err.Error())
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(contract.ABI)
+	helper.JsonResponse(w, http.StatusOK, map[string]interface{}{"status": "Success", "Contract": contract.ABI})
 }
 
 func (c *Controller) CheckExistence(w http.ResponseWriter, r *http.Request) {
 	addr := r.FormValue("address")
 	network := r.FormValue("network")
 	hash := helper.GenerateHash(network,addr)
-
-	contract, err := c.DB.GetContractByIdentifier(hash)
+	hashStr:= hex.EncodeToString(hash[:])
+	contract, err := c.DB.GetContractByIdentifier(hashStr)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+		helper.Error(w,http.StatusBadRequest,err.Error())
 		return
 	}
 	helper.JsonResponse(w, http.StatusOK, map[string]interface{}{"status": "Success", "Contract": contract.Json()})

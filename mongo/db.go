@@ -5,7 +5,6 @@ import (
 
 	"github.com/jiffy-backend/config"
 	"github.com/jiffy-backend/helper"
-	"encoding/hex"
 )
 
 type DB struct{}
@@ -82,7 +81,7 @@ func (DB *DB) GetContractByAddr(addr string) (contract ContractObj, err error) {
 	return contract, nil
 }
 
-func (DB *DB) GetContractByIdentifier(hash [32]byte) (ContractObj, error) {
+func (DB *DB) GetContractByIdentifier(hash string) (ContractObj, error) {
 	session, err := NewSession(config.SERVER)
 	if err != nil {
 		log.Fatalf("Unable to connect to mongo: %s", err)
@@ -92,7 +91,7 @@ func (DB *DB) GetContractByIdentifier(hash [32]byte) (ContractObj, error) {
 	var contract ContractObj
 	err = c.GetContractByIdentifier(hash, &contract)
 	if err != nil {
-		helper.DBLogger.Error("Unable to get contract by hash", "Error", err,"hash",hex.EncodeToString(hash[:]))
+		helper.DBLogger.Error("Unable to get contract by hash", "Error", err,"hash",hash)
 		return contract, err
 	}
 	return contract, nil
