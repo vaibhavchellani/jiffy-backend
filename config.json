@@ -3,5 +3,5 @@
   "main_chain":"https://mainnet.infura.io",
   "ropsten_chain":"https://ropsten.infura.io",
   "rinkelby_chain":"https://rinkeby.infura.io",
-  "kovan_chain":"https://rinkeby.infura.io",
+  "kovan_chain":"https://kovan.infura.io",
 }

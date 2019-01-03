@@ -11,7 +11,7 @@ import (
 	"github.com/jiffy-backend/helper"
 	"github.com/pkg/errors"
 	"strings"
-	"github.com/jiffy-backend/server"
+	"encoding/hex"
 )
 
 type Controller struct {
@@ -34,13 +34,12 @@ func (c *Controller) Register(w http.ResponseWriter, r *http.Request) {
 }
 
 type ContractInput struct {
-	Name    string  `json:"name"`
-	Address string  `json:"address"`
-	Network string  `json:"network"`
-	ABI     abi.ABI `json:"abi"`
-	Owner   string  `json:"owner"`
+	Name    string  `json:"name"`              // name given to contract => used to generate unique URL
+	Address string  `json:"address"`           // address of contract
+	ABI     abi.ABI `json:"abi"`               // abi of contract
+	Owner   string  `json:"owner"`             // owner aka address registering the contract
+	Network string  `json:"network"` // network URL
 }
-
 
 // TODO make sure name doesnt match with existing routes
 // handler for contract registration
@@ -64,40 +63,43 @@ func (c *Controller) RegisterContract(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(err.Error()))
 		return
 	}
-	var newAbi abi.ABI
-	//helper.UnMarshallABI(abiBytes,&newAbi)
-	if err:=newAbi.UnmarshalJSON(abiBytes) ; err!=nil{
-		helper.ControllerLogger.Error("unable to unmarshall")
-	}
-	// TODO figure out a way to save abi and reproduce the same
-	helper.ControllerLogger.Debug("new abi","bytes",abiBytes,"unmae",newAbi.UnmarshalJSON(abiBytes),"Inp",m.ABI)
-	//if common.IsHexAddress(m.Address) {
-	//	err := errors.New("Contract address is not valid ethereum address")
-	//	w.WriteHeader(http.StatusBadRequest)
-	//	w.Write([]byte(err.Error()))
-	//	return
-	//}
-	//if common.IsHexAddress(m.Owner) {
-	//	err := errors.New("Owner address is not valid ethereum address")
-	//	w.WriteHeader(http.StatusBadRequest)
-	//	w.Write([]byte(err.Error()))
-	//	return
-	//}
 
-	// TODO check if network is one of our allowed networks , put chainID in DB not string
+	// WIP
+	//var newAbi abi.ABI
+	////helper.UnMarshallABI(abiBytes,&newAbi)
+	//if err := newAbi.UnmarshalJSON(abiBytes); err != nil {
+	//	helper.ControllerLogger.Error("unable to unmarshall")
+	//}
+	//// TODO figure out a way to save abi and reproduce the same
+	//helper.ControllerLogger.Debug("new abi", "bytes", abiBytes, "unmae", newAbi.UnmarshalJSON(abiBytes), "Inp", m.ABI)
+
+
+	name, err := helper.GetNetworkDetails(m.Network)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
+		return
+	}
 
 	// convert address/name to lowercase to simplify search
 	contract := ContractObj{
-		Name:      m.Name,
-		Address:   strings.ToLower(m.Address),
-		Network:   m.Network,
-		ABI:       abiBytes,
-		QueryName: strings.ToLower(m.Name),
-		Owner:     strings.ToLower(m.Owner),
-		Identifier: helper.GenerateHash(m.Network,m.Address),
+		Name:        m.Name,
+		Address:     strings.ToLower(m.Address),
+		NetworkName: name,
+		ABI:         abiBytes,
+		QueryName:   strings.ToLower(m.Name),
+		Owner:       strings.ToLower(m.Owner),
+		Identifier:  helper.GenerateHash(name,m.Address),
+		NetworkURL:  m.Network,
 	}
 
-	helper.ControllerLogger.Debug("Contract registration initiated", "Address", contract.Address, "Name", contract.Name, "Network", contract.Network)
+	helper.ControllerLogger.Debug("hash generated","hash",hex.EncodeToString(contract.Identifier[:]))
+	if err:=contract.ValidateBasic(); err!=nil {
+		// add error
+		return
+	}
+
+	helper.ControllerLogger.Debug("Contract registration initiated", "Address", contract.Address, "Name", contract.Name, "Network", contract.NetworkName)
 
 	err = c.DB.RegisterContract(contract)
 	if err != nil {
@@ -107,7 +109,7 @@ func (c *Controller) RegisterContract(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, err := json.Marshal(map[string]interface{}{"status": "Success","Contract":contract.Json()})
+	result, err := json.Marshal(map[string]interface{}{"status": "Success", "Contract": contract.Json()})
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error()))
@@ -173,11 +175,11 @@ func (c *Controller) GetContract(w http.ResponseWriter, r *http.Request) {
 }
 
 // get dapp given dapp name and spit abi
-func (c *Controller) GetDapp(w http.ResponseWriter, r *http.Request){
+func (c *Controller) GetDapp(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	name := vars["dapp_name"]
-	contract,err:= c.DB.GetContractByName(name)
-	if err!=nil{
+	contract, err := c.DB.GetContractByName(name)
+	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -185,20 +187,16 @@ func (c *Controller) GetDapp(w http.ResponseWriter, r *http.Request){
 	w.Write(contract.ABI)
 }
 
-func (c *Controller) CheckExistence(w http.ResponseWriter, r *http.Request){
+func (c *Controller) CheckExistence(w http.ResponseWriter, r *http.Request) {
 	addr := r.FormValue("address")
-	network:= r.FormValue("network")
-	hash:= helper.GenerateHash(network,addr)
+	network := r.FormValue("network")
+	hash := helper.GenerateHash(network,addr)
 
-	contract,err:=c.DB.GetContractByIdentifier(hash)
-	if err!=nil{
+	contract, err := c.DB.GetContractByIdentifier(hash)
+	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-
-	server.JsonResponse(w,http.StatusOK,map[string]interface{}{"status": "Success","Contract":contract.Json()})
-
+	helper.JsonResponse(w, http.StatusOK, map[string]interface{}{"status": "Success", "Contract": contract.Json()})
 }
-
-
 

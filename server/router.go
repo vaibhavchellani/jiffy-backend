@@ -47,7 +47,7 @@ var routes = Routes{
 		"GET",
 		"/exists",
 		controller.CheckExistence,
-		[]string{"address","network"},
+		[]string{"address", "network"},
 	},
 	Route{
 		"GetDapp",
@@ -69,8 +69,8 @@ func NewRouter() *mux.Router {
 			Path(route.Pattern).
 			Name(route.Name).
 			Handler(handler)
-		if len(route.Queries)!=0 {
-			for _,query:= range route.Queries{
+		if len(route.Queries) != 0 {
+			for _, query := range route.Queries {
 				router.Queries(query, "{"+query+"}")
 			}
 		}

@@ -6,6 +6,7 @@ Jiffy backend will store contract addresses, ABI's ,recorded labels for register
 
 #### Services provided
 
+- [ ] AUTH using ethereum signatures
 - [x]  Registering new contract and address with unique URL
 - [ ] Registering labels per user address and contract
 - [x] Assigning jiffy subdomains to contract
