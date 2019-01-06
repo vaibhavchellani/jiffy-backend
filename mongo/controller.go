@@ -78,6 +78,17 @@ func (c *Controller) RegisterContract(w http.ResponseWriter, r *http.Request) {
 	}
 
 	helper.ControllerLogger.Debug("hash generated","hash",contractHashStr)
+	// link to exisitng contract by name
+	existingContract,err:=c.DB.GetContractByIdentifier(contractHashStr)
+	if err == nil{
+		if strings.Compare(existingContract.Cloned,"")==0{
+			contract.Cloned = existingContract.Name
+		}else{
+			contract.Cloned = existingContract.Cloned
+		}
+
+	}
+
 	if err:=contract.ValidateBasic(); err!=nil {
 		// add error
 		return
@@ -93,7 +104,6 @@ func (c *Controller) RegisterContract(w http.ResponseWriter, r *http.Request) {
 	}
 
 	helper.JsonResponse(w, http.StatusOK, map[string]interface{}{"status": "Success", "Contract": contract.Json()})
-
 }
 
 // handler for label registration
