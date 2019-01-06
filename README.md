@@ -6,8 +6,23 @@ Jiffy backend will store contract addresses, ABI's ,recorded labels for register
 
 #### Services provided
 
-- Registering new contract and address with unique
-- Registering labels per user address and contract
-- Assigning jiffy subdomains to contract
-- Transactions and calls sorted per contract address
-- Transaction/Call per label id
+- [ ] AUTH using ethereum signatures
+- [x]  Registering new contract and address with unique URL
+- [ ] Registering labels per user address and contract
+- [x] Assigning jiffy subdomains to contract
+- [ ] Transactions and calls sorted per contract address
+- [ ] Transaction/Call per label id
+- [ ] Adding proper handling for ABI 
+- [ ] Adding API versioning
+
+## Installation Instructions 
+
+```bash
+$ dep ensure -v
+```
+
+## Run server 
+
+```bash
+$ go run main.go
+```
