@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/gorilla/mux"
 	"github.com/jiffy-backend/helper"
@@ -36,7 +35,7 @@ func (c *Controller) Register(w http.ResponseWriter, r *http.Request) {
 type ContractInput struct {
 	Name    string  `json:"name"`              // name given to contract => used to generate unique URL
 	Address string  `json:"address"`           // address of contract
-	ABI     abi.ABI `json:"abi"`               // abi of contract
+	ABI     string `json:"abi"`               // abi of contract
 	Owner   string  `json:"owner"`             // owner aka address registering the contract
 	Network string  `json:"network"` // network URL
 }
@@ -48,47 +47,30 @@ func (c *Controller) RegisterContract(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		helper.Error(w,http.StatusBadRequest,err.Error())
-
 		return
 	}
 	err = json.Unmarshal(body, &m)
 	if err != nil {
 		helper.Error(w,http.StatusBadRequest,err.Error())
-
 		return
 	}
-	abiBytes, err := helper.MarshallABI(m.ABI)
-	if err != nil {
-		helper.Error(w,http.StatusBadRequest,err.Error())
-
-		return
-	}
-
-	// WIP
-	//var newAbi abi.ABI
-	////helper.UnMarshallABI(abiBytes,&newAbi)
-	//if err := newAbi.UnmarshalJSON(abiBytes); err != nil {
-	//	helper.ControllerLogger.Error("unable to unmarshall")
-	//}
-	//// TODO figure out a way to save abi and reproduce the same
-	//helper.ControllerLogger.Debug("new abi", "bytes", abiBytes, "unmae", newAbi.UnmarshalJSON(abiBytes), "Inp", m.ABI)
 
 
 	name, err := helper.GetNetworkDetails(m.Network)
 	if err != nil {
 		helper.Error(w,http.StatusBadRequest,err.Error())
-
 		return
 	}
 
 	contractHash:=helper.GenerateHash(name,m.Address)
 	contractHashStr:=hex.EncodeToString(contractHash[:])
+
 	// convert address/name to lowercase to simplify search
 	contract := ContractObj{
 		Name:        m.Name,
 		Address:     strings.ToLower(m.Address),
 		NetworkName: name,
-		ABI:         abiBytes,
+		ABI:         m.ABI,
 		QueryName:   strings.ToLower(m.Name),
 		Owner:       strings.ToLower(m.Owner),
 		Identifier:  contractHashStr,
@@ -107,7 +89,6 @@ func (c *Controller) RegisterContract(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		helper.ControllerLogger.Error("Unable to register contract", "Error", err)
 		helper.Error(w,http.StatusBadRequest,err.Error())
-
 		return
 	}
 
@@ -164,7 +145,7 @@ func (c *Controller) GetDapp(w http.ResponseWriter, r *http.Request) {
 		helper.Error(w,http.StatusBadRequest,err.Error())
 		return
 	}
-	helper.JsonResponse(w, http.StatusOK, map[string]interface{}{"status": "Success", "Contract": contract.ABI})
+	helper.JsonResponse(w, http.StatusOK, map[string]interface{}{"status": "Success", "Contract":contract.ABI})
 }
 
 func (c *Controller) CheckExistence(w http.ResponseWriter, r *http.Request) {

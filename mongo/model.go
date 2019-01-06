@@ -2,9 +2,7 @@ package mongo
 
 import (
 	"fmt"
-	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/jiffy-backend/helper"
 )
 
 // Make sure to update JSON when doing this
@@ -12,11 +10,12 @@ type ContractObj struct {
 	Name        string   `bson:"name"`
 	Address     string   `bson:"contract_address"`
 	NetworkName string   `bson:"network_name"`
-	ABI         []byte   `bson:"abi"`
+	ABI         string   `bson:"abi"`
 	QueryName   string   `bson:"queryable_name"`
 	Owner       string   `bson:"owner_address"`
 	Identifier  string `bson:"contract_hash"`
 	NetworkURL  string   `bson:"network_url"`
+	Cloned string `bson:"cloned_from"` // name of previous dapp --> identified by hash
 }
 
 // generate string representation for contract
@@ -30,20 +29,21 @@ type ContractObjJson struct {
 	Name       string  `json:"name"`
 	Address    string  `json:"contract_address"`
 	NetworkName string   `bson:"network_name"`
-	ABI        abi.ABI `json:"abi"`
+	ABI        string `json:"abi"`
 	Owner      string  `json:"owner_address"`
 	Identifier string  `json:"contract_hash"`
 	NetworkURL  string   `json:"network_url"`
 }
+
 func (c *ContractObj) Json() ContractObjJson {
 	//identifier := hex.EncodeToString(c.Identifier[:])
-	var abi abi.ABI
-	helper.UnMarshallABI(c.ABI, &abi)
+	//var abi abi.ABI
+	//helper.UnMarshallABI(c.ABI, &abi)
 	contract := ContractObjJson{
 		Name:       c.Name,
 		Address:    c.Address,
 		NetworkName:    c.NetworkName,
-		ABI:        abi,
+		ABI:        c.ABI,
 		Owner:      c.Owner,
 		Identifier: c.Identifier,
 		NetworkURL:c.NetworkURL,
