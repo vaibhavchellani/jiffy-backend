@@ -8,4 +8,6 @@ const (
 	RopstenChainURL    = "https://ropsten.infura.io"
 	KovanChainURL      = "https://kovan.infura.io"
 	RinkelbyChainURL   = "https://rinkeby.infura.io"
+	Transaction        = "TRANSACTION"
+	Call               = "CALL"
 )

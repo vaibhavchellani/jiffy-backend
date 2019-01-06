@@ -3,19 +3,21 @@ package mongo
 import (
 	"fmt"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/globalsign/mgo/bson"
 )
 
 // Make sure to update JSON when doing this
 type ContractObj struct {
-	Name        string `bson:"name"`
-	Address     string `bson:"contract_address"`
-	NetworkName string `bson:"network_name"`
-	ABI         string `bson:"abi"`
-	QueryName   string `bson:"queryable_name"`
-	Owner       string `bson:"owner_address"`
-	Identifier  string `bson:"contract_hash"`
-	NetworkURL  string `bson:"network_url"`
-	Cloned      string `bson:"cloned_from"` // name of previous dapp --> identified by hash
+	Name        string        `bson:"name"`             // unique name of contract
+	Address     string        `bson:"contract_address"` // contract address
+	NetworkName string        `bson:"network_name"`     // network name where contract is deployed
+	ABI         string        `bson:"abi"`              // string representation of contract
+	QueryName   string        `bson:"queryable_name"`   // lower case name
+	Owner       string        `bson:"owner_address"`    // address of contract registrar on jiffy
+	Identifier  string        `bson:"contract_hash"`    // hash(network+address)
+	NetworkURL  string        `bson:"network_url"`      // network URL
+	Cloned      string        `bson:"cloned_from"`      // name of previous dapp --> identified by identifier
+	ID          bson.ObjectId `bson:"_id"`              // id for contract
 }
 
 // generate string representation for contract
@@ -36,9 +38,6 @@ type ContractObjJson struct {
 }
 
 func (c *ContractObj) Json() ContractObjJson {
-	//identifier := hex.EncodeToString(c.Identifier[:])
-	//var abi abi.ABI
-	//helper.UnMarshallABI(c.ABI, &abi)
 	contract := ContractObjJson{
 		Name:        c.Name,
 		Address:     c.Address,
@@ -71,6 +70,27 @@ func (c *ContractObj) ValidateBasic() error {
 	return nil
 }
 
+// Label Model
+//--------------------
+
+type Label struct {
+	ContractName string        `bson:"contract_name"`
+	ContractID   bson.ObjectId `bson:"contract_id"`
+	CreatorAddr  string        `bson:"creator_addr"`
+	Functions    []Function    `bson:"functions"`
+	ID           bson.ObjectId `bson:"_id"`
+}
+
+//--------------------
+
+type Function struct {
+	MethodSig []byte `bson:"method_sig"`
+	Skippable bool   `bson:"skippable"`
+	Usage     string `bson:"usage"`
+}
+
+//--------------------
+
 type User struct {
-	Address common.Address `json:"user_address"`
+	Address common.Address `bson:"user_address"`
 }
