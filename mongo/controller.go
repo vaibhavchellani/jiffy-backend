@@ -11,6 +11,7 @@ import (
 	"github.com/jiffy-backend/helper"
 	"github.com/pkg/errors"
 	"strings"
+	"github.com/jiffy-backend/config"
 )
 
 type Controller struct {
@@ -78,6 +79,11 @@ func (c *Controller) RegisterContract(w http.ResponseWriter, r *http.Request) {
 
 	helper.ControllerLogger.Debug("hash generated", "hash", contractHashStr)
 
+	if err := contract.ValidateBasic(); err != nil {
+		// add error
+		return
+	}
+
 	// link to exisitng contract by name
 	existingContract, err := c.DB.GetContractByIdentifier(contractHashStr)
 	if err == nil {
@@ -86,11 +92,6 @@ func (c *Controller) RegisterContract(w http.ResponseWriter, r *http.Request) {
 		} else {
 			contract.Cloned = existingContract.Cloned
 		}
-	}
-
-	if err := contract.ValidateBasic(); err != nil {
-		// add error
-		return
 	}
 
 	helper.ControllerLogger.Debug("Contract registration initiated", "Address", contract.Address, "Name", contract.Name, "Network", contract.NetworkName)
@@ -105,9 +106,73 @@ func (c *Controller) RegisterContract(w http.ResponseWriter, r *http.Request) {
 	helper.JsonResponse(w, http.StatusOK, map[string]interface{}{"status": "Success", "Contract": contract.Json()})
 }
 
+type LabelInput struct {
+	Name string `json:"name"`
+	Description string `json:"description"`
+	CreatorAddr string 	`json:"creator"`
+	Functions []FuncInput `json:"functions"`
+	ContractName string `json:"contract_name"`
+}
+type FuncInput struct {
+	MethodSig string `json:"method_sig"`
+	Skippable bool   `json:"skippable"`
+	Usage     int `json:"usage"` // transaction or call(1 == tx , 0== call)
+	Description string `json:"description"`
+}
+
 // handler for label registration
 func (c *Controller) RegisterLabel(w http.ResponseWriter, r *http.Request) {
-	//c.DB.RegisterContract()
+	var m LabelInput
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		helper.Error(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	err = json.Unmarshal(body, &m)
+	if err != nil {
+		helper.Error(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	if strings.Compare(m.ContractName,"")==0{
+		err = errors.New("Empty contract name not allowed")
+		helper.Error(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	contract, err := c.DB.GetContractByName(m.ContractName)
+	if err != nil {
+		helper.Error(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	var functions []Function
+	for _,functionInput := range m.Functions {
+		usage := config.Call
+		if functionInput.Usage == 1{
+			usage =config.Transaction
+		}
+		function:= Function{
+			MethodSig:[]byte(functionInput.MethodSig),
+			Skippable:functionInput.Skippable,
+			Usage:usage,
+			Description:functionInput.Description,
+		}
+		functions = append(functions, function)
+	}
+
+	label := Label{
+		ContractName: m.ContractName,
+		ContractID:contract.ID,
+		CreatorAddr:contract.Address,
+		Functions:functions,
+		Name:m.Name,
+		Description:m.Description,
+	}
+	err = c.DB.RegisterLabel(label)
+	if err != nil {
+		helper.Error(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	helper.JsonResponse(w, http.StatusOK, map[string]interface{}{"status": "Success", "Label": label})
 }
 
 // get all contracts
@@ -124,6 +189,11 @@ func (c *Controller) GetContracts(w http.ResponseWriter, r *http.Request) {
 func (c *Controller) GetContract(w http.ResponseWriter, r *http.Request) {
 	// filter contract by name/address
 	filter := r.FormValue("filter")
+	if strings.Compare(filter,"")==0{
+		err:= errors.New("Please provide address or name of contract to search")
+		helper.Error(w, http.StatusBadRequest, err.Error())
+		return
+	}
 	var contract ContractObj
 	var err error
 	// if filter is an address get contract by address else by name
@@ -149,6 +219,9 @@ func (c *Controller) GetContract(w http.ResponseWriter, r *http.Request) {
 func (c *Controller) GetDapp(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	name := vars["dapp_name"]
+	if strings.Compare(name,"")==0{
+		// TODO should be redirected to home page
+	}
 	contract, err := c.DB.GetContractByName(name)
 	if err != nil {
 		helper.Error(w, http.StatusBadRequest, err.Error())
@@ -160,6 +233,18 @@ func (c *Controller) GetDapp(w http.ResponseWriter, r *http.Request) {
 func (c *Controller) CheckExistence(w http.ResponseWriter, r *http.Request) {
 	addr := r.FormValue("address")
 	network := r.FormValue("network")
+	if strings.Compare(addr,"")==0{
+		err:= errors.New("Please provide address")
+		helper.Error(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	if strings.Compare(network,"")==0{
+		err:= errors.New("Please provide network")
+		helper.Error(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+
 	hash := helper.GenerateHash(network, addr)
 	hashStr := hex.EncodeToString(hash[:])
 	contract, err := c.DB.GetContractByIdentifier(hashStr)

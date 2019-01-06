@@ -79,6 +79,12 @@ type Label struct {
 	CreatorAddr  string        `bson:"creator_addr"`
 	Functions    []Function    `bson:"functions"`
 	ID           bson.ObjectId `bson:"_id"`
+	Name string `bson:"name"`
+	Description string `bson:"description"`
+}
+
+func (l *Label) String() string  {
+	return fmt.Sprintf("Label ---> ContractName:%v LabelName:%v ",l.ContractName,l.Name)
 }
 
 //--------------------
@@ -86,7 +92,8 @@ type Label struct {
 type Function struct {
 	MethodSig []byte `bson:"method_sig"`
 	Skippable bool   `bson:"skippable"`
-	Usage     string `bson:"usage"`
+	Usage     string `bson:"usage"` // transaction or call
+	Description string `bson:"description"`
 }
 
 //--------------------

@@ -5,6 +5,7 @@ import (
 	"github.com/globalsign/mgo/bson"
 	"log"
 	"strings"
+	"github.com/jiffy-backend/config"
 )
 
 type ContractService struct {
@@ -21,13 +22,15 @@ func contractModelIndex() mgo.Index {
 	}
 }
 
-func NewContractService(session *Session, dbName string, collectionName string) *ContractService {
-	collection := session.GetCollection(dbName, collectionName)
+func NewContractService(session *Session, dbName string) *ContractService {
+	collection := session.GetCollection(dbName, config.ContractCollection)
 	collection.EnsureIndex(contractModelIndex())
 	return &ContractService{collection}
 }
 
 func (c *ContractService) Register(contract ContractObj) error {
+	objectID:=bson.NewObjectId()
+	contract.ID = objectID
 	err := c.collection.Insert(contract)
 	if err != nil {
 		return err

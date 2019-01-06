@@ -1,6 +1,9 @@
 package mongo
 
-import "github.com/globalsign/mgo"
+import (
+	"github.com/globalsign/mgo"
+	"github.com/jiffy-backend/config"
+)
 
 // labels will refer functions by 4 byte unique signatures
 
@@ -18,8 +21,16 @@ func labelModelIndex() mgo.Index {
 	}
 }
 
-func NewLabelService(session *Session, dbName string, collectionName string) *LabelService {
-	collection := session.GetCollection(dbName, collectionName)
+func NewLabelService(session *Session, dbName string) *LabelService {
+	collection := session.GetCollection(dbName, config.LabelCollection)
 	collection.EnsureIndex(contractModelIndex())
 	return &LabelService{collection}
+}
+
+func (c *LabelService) Register(label Label) error {
+	err := c.collection.Insert(label)
+	if err != nil {
+		return err
+	}
+	return nil
 }

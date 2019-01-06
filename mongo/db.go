@@ -5,6 +5,7 @@ import (
 
 	"github.com/jiffy-backend/config"
 	"github.com/jiffy-backend/helper"
+	"github.com/globalsign/mgo/bson"
 )
 
 type DB struct{}
@@ -16,18 +17,12 @@ func (DB *DB) RegisterContract(contract ContractObj) error {
 		log.Fatalf("Unable to connect to mongo: %s", err)
 	}
 	defer session.Close()
-	c := NewContractService(session.Copy(), config.DBNAME, config.ContractCollection)
+	c := NewContractService(session.Copy(), config.DBNAME)
 	err = c.Register(contract)
 	if err != nil {
 		return err
 	}
 	helper.DBLogger.Info("Successfully added new contract", "Contract", contract.String())
-	return nil
-}
-
-// register label per contract
-func (DB *DB) RegisterLabel(name string) (err error) {
-
 	return nil
 }
 
@@ -38,7 +33,7 @@ func (DB *DB) GetContracts() (contracts []ContractObj, err error) {
 		log.Fatalf("Unable to connect to mongo: %s", err)
 	}
 	defer session.Close()
-	c := NewContractService(session.Copy(), config.DBNAME, config.ContractCollection)
+	c := NewContractService(session.Copy(), config.DBNAME)
 	err = c.GetAllContracts(&contracts)
 	if err != nil {
 		helper.DBLogger.Error("Cannot fetch all contracts", "Error", err)
@@ -54,7 +49,7 @@ func (DB *DB) GetContractByName(name string) (contract ContractObj, err error) {
 		log.Fatalf("Unable to connect to mongo: %s", err)
 	}
 	defer session.Close()
-	c := NewContractService(session.Copy(), config.DBNAME, config.ContractCollection)
+	c := NewContractService(session.Copy(), config.DBNAME)
 	err = c.GetContractByName(&contract, name)
 	if err != nil {
 		helper.DBLogger.Error("Unable to get contract", "Name", name, "Error", err)
@@ -71,7 +66,7 @@ func (DB *DB) GetContractByAddr(addr string) (contract ContractObj, err error) {
 		log.Fatalf("Unable to connect to mongo: %s", err)
 	}
 	defer session.Close()
-	c := NewContractService(session.Copy(), config.DBNAME, config.ContractCollection)
+	c := NewContractService(session.Copy(), config.DBNAME)
 	err = c.GetContractByAddress(&contract, addr)
 	if err != nil {
 		helper.DBLogger.Error("Unable to get contract", "Address", addr, "Error", err)
@@ -87,7 +82,7 @@ func (DB *DB) GetContractByIdentifier(hash string) (ContractObj, error) {
 		log.Fatalf("Unable to connect to mongo: %s", err)
 	}
 	defer session.Close()
-	c := NewContractService(session.Copy(), config.DBNAME, config.ContractCollection)
+	c := NewContractService(session.Copy(), config.DBNAME)
 	var contract ContractObj
 	err = c.GetContractByIdentifier(hash, &contract)
 	if err != nil {
@@ -96,3 +91,30 @@ func (DB *DB) GetContractByIdentifier(hash string) (ContractObj, error) {
 	}
 	return contract, nil
 }
+
+// ---- Label related ops
+
+// register label
+func (DB *DB) RegisterLabel(label Label) (err error) {
+	session, err := NewSession(config.SERVER)
+	if err != nil {
+		log.Fatalf("Unable to connect to mongo: %s", err)
+	}
+	defer session.Close()
+	c := NewLabelService(session.Copy(), config.DBNAME)
+	labelID:=bson.NewObjectId()
+	label.ID = labelID
+	// TODO attach label ID with contract 
+	err = c.Register(label)
+	if err!=nil{
+		helper.DBLogger.Error("Unable to register label","Error",err,"Label",label.String())
+		return err
+	}
+	return nil
+}
+
+
+
+
+
+// -------
