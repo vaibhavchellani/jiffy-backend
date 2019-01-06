@@ -91,7 +91,7 @@ func (DB *DB) GetContractByIdentifier(hash string) (ContractObj, error) {
 	var contract ContractObj
 	err = c.GetContractByIdentifier(hash, &contract)
 	if err != nil {
-		helper.DBLogger.Error("Unable to get contract by hash", "Error", err,"hash",hash)
+		helper.DBLogger.Error("Unable to get contract by hash", "Error", err, "hash", hash)
 		return contract, err
 	}
 	return contract, nil

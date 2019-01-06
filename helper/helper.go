@@ -28,7 +28,7 @@ func UnMarshallABI(abiBytes []byte, abi *abi.ABI) error {
 }
 
 func GenerateHash(network string, address string) [32]byte {
-	identifier := fmt.Sprintf(strings.ToLower(network),strings.ToLower(address))
+	identifier := fmt.Sprintf(strings.ToLower(network), strings.ToLower(address))
 	return sha256.Sum256([]byte(identifier))
 }
 
