@@ -160,4 +160,50 @@ func (DB *DB) GetLabelViaContractName(name string) (labels []Label, err error) {
 	return labels, nil
 }
 
+func (DB *DB) GetLabelByID(labelID bson.ObjectId) (label Label, err error) {
+	session, err := NewSession(config.SERVER)
+	if err != nil {
+		log.Fatalf("Unable to connect to mongo: %s", err)
+	}
+	defer session.Close()
+	l := NewLabelService(session.Copy(), config.DBNAME)
+	helper.DBLogger.Info("Fetching Label","LabelID",labelID)
+	err = l.GetLabelByID(labelID,&label)
+	if err!=nil{
+		helper.DBLogger.Error("Unable to fetch label from DB","ID",labelID)
+		return label,err
+	}
+	return label,nil
+}
+
+func (DB *DB) GetLabelByIDs(labelIDs []bson.ObjectId) ([]Label,error) {
+	session, err := NewSession(config.SERVER)
+	if err != nil {
+		log.Fatalf("Unable to connect to mongo: %s", err)
+	}
+	defer session.Close()
+	l := NewLabelService(session.Copy(), config.DBNAME)
+	helper.DBLogger.Info("Fetching Labels","LabelIDs",labelIDs)
+	labels,err := l.GetLabelByIDS(labelIDs)
+	if err!=nil{
+		helper.DBLogger.Error("Unable to fetch label from DB","ID",labelIDs)
+		return labels,err
+	}
+	return labels,nil
+}
+
+func (DB *DB) AddFnToLabel(labelID bson.ObjectId,fns []Function) ([]Label,error) {
+	
+
+
+}
+
+
+
+
+
+
+
+
+
 // -------

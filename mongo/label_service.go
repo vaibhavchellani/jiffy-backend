@@ -63,7 +63,7 @@ func (c *LabelService) GetLabelByCreator(creator string, labels *[]Label) (err e
 }
 
 // get label by ID
-func (c *LabelService) GetLabelByID(_id bson.ObjectId, label Label) (err error) {
+func (c *LabelService) GetLabelByID(_id bson.ObjectId, label *Label) (err error) {
 	err = c.collection.Find(bson.M{"_id": _id}).One(label)
 	if err != nil {
 		return err
