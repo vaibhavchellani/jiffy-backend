@@ -4,9 +4,9 @@ import (
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
 	"github.com/jiffy-backend/config"
+	"github.com/jiffy-backend/helper"
 	"log"
 	"strings"
-	"github.com/jiffy-backend/helper"
 )
 
 type IContractService interface {
@@ -15,7 +15,7 @@ type IContractService interface {
 	GetContractByName(contract *ContractObj, name string) (err error)
 	GetContractByAddress(contract *ContractObj, address string) (err error)
 	GetContractByIdentifier(hash string, contract *ContractObj) (err error)
-	AddLabel(_id bson.ObjectId,contractID bson.ObjectId) (err error)
+	AddLabel(_id bson.ObjectId, contractID bson.ObjectId) (err error)
 }
 
 type ContractService struct {
@@ -81,12 +81,12 @@ func (c *ContractService) GetContractByIdentifier(hash string, contract *Contrac
 	return nil
 }
 
-func (c *ContractService) AddLabel(_id bson.ObjectId,contractID bson.ObjectId) (err error) {
-	selector:= bson.M{"_id":contractID}
-	changeInfo,err :=c.collection.Upsert(selector,bson.M{"$push":bson.M{"label_id":_id}})
-	if err!=nil{
+func (c *ContractService) AddLabel(_id bson.ObjectId, contractID bson.ObjectId) (err error) {
+	selector := bson.M{"_id": contractID}
+	changeInfo, err := c.collection.Upsert(selector, bson.M{"$push": bson.M{"label_id": _id}})
+	if err != nil {
 		return err
 	}
-	helper.DBLogger.Debug("Added label to contract","ChangeInfo",changeInfo)
+	helper.DBLogger.Debug("Added label to contract", "ChangeInfo", changeInfo)
 	return nil
 }

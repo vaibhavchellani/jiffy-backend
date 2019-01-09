@@ -12,8 +12,6 @@ import (
 // ALL pre prossing before insert/update/get/delete to be applied here
 // then forwarded to services
 
-
-
 type DB struct{}
 
 // registers a contract
@@ -121,10 +119,10 @@ func (DB *DB) RegisterLabel(label Label) (err error) {
 	if err != nil {
 		helper.DBLogger.Error("Unable to register label", "Error", err, "Label", label.String())
 		return err
-	}else{
-		err = c.AddLabel(labelID,label.ContractID)
-		if err!=nil{
-			helper.DBLogger.Error("Unable to add label to contract", "Error", err, "Label", label.String(),"Contract",label.ContractName)
+	} else {
+		err = c.AddLabel(labelID, label.ContractID)
+		if err != nil {
+			helper.DBLogger.Error("Unable to add label to contract", "Error", err, "Label", label.String(), "Contract", label.ContractName)
 			return err
 		}
 	}
@@ -132,14 +130,14 @@ func (DB *DB) RegisterLabel(label Label) (err error) {
 	return nil
 }
 
-func (DB *DB) GetLabelViaCreator(creatorAddr string)(labels []Label,err error)  {
+func (DB *DB) GetLabelViaCreator(creatorAddr string) (labels []Label, err error) {
 	session, err := NewSession(config.SERVER)
 	if err != nil {
 		log.Fatalf("Unable to connect to mongo: %s", err)
 	}
 	defer session.Close()
 	l := NewLabelService(session.Copy(), config.DBNAME)
-	l.GetLabelByCreator(creatorAddr,&labels)
+	l.GetLabelByCreator(creatorAddr, &labels)
 	if err != nil {
 		helper.DBLogger.Error("Cannot fetch all contracts", "Error", err)
 		return labels, err
@@ -147,14 +145,14 @@ func (DB *DB) GetLabelViaCreator(creatorAddr string)(labels []Label,err error)  
 	return labels, nil
 }
 
-func (DB *DB) GetLabelViaContractName(name string) (labels []Label,err error)  {
+func (DB *DB) GetLabelViaContractName(name string) (labels []Label, err error) {
 	session, err := NewSession(config.SERVER)
 	if err != nil {
 		log.Fatalf("Unable to connect to mongo: %s", err)
 	}
 	defer session.Close()
 	l := NewLabelService(session.Copy(), config.DBNAME)
-	l.GetLabelByCreator(name,&labels)
+	l.GetLabelByCreator(name, &labels)
 	if err != nil {
 		helper.DBLogger.Error("Cannot fetch all contracts", "Error", err)
 		return labels, err
