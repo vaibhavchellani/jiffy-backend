@@ -3,9 +3,9 @@ package mongo
 import (
 	"log"
 
+	"github.com/globalsign/mgo/bson"
 	"github.com/jiffy-backend/config"
 	"github.com/jiffy-backend/helper"
-	"github.com/globalsign/mgo/bson"
 )
 
 type DB struct{}
@@ -101,20 +101,27 @@ func (DB *DB) RegisterLabel(label Label) (err error) {
 		log.Fatalf("Unable to connect to mongo: %s", err)
 	}
 	defer session.Close()
-	c := NewLabelService(session.Copy(), config.DBNAME)
-	labelID:=bson.NewObjectId()
+	l := NewLabelService(session.Copy(), config.DBNAME)
+	c := NewContractService(session.Copy(), config.DBNAME)
+	labelID := bson.NewObjectId()
 	label.ID = labelID
-	// TODO attach label ID with contract 
-	err = c.Register(label)
-	if err!=nil{
-		helper.DBLogger.Error("Unable to register label","Error",err,"Label",label.String())
+
+	// TODO make this operation atomic
+	// first add lable to contract then create entity
+
+	err = l.Register(label)
+	if err != nil {
+		helper.DBLogger.Error("Unable to register label", "Error", err, "Label", label.String())
 		return err
+	}else{
+		err = c.AddLabel(labelID,label.ContractID)
+		if err!=nil{
+			helper.DBLogger.Error("Unable to add label to contract", "Error", err, "Label", label.String(),"Contract",label.ContractName)
+			return err
+		}
 	}
+
 	return nil
 }
-
-
-
-
 
 // -------

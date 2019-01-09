@@ -18,6 +18,7 @@ type ContractObj struct {
 	NetworkURL  string        `bson:"network_url"`      // network URL
 	Cloned      string        `bson:"cloned_from"`      // name of previous dapp --> identified by identifier
 	ID          bson.ObjectId `bson:"_id"`              // id for contract
+	Labels      []Label       `bson:"labels"`
 }
 
 // generate string representation for contract
@@ -79,20 +80,20 @@ type Label struct {
 	CreatorAddr  string        `bson:"creator_addr"`
 	Functions    []Function    `bson:"functions"`
 	ID           bson.ObjectId `bson:"_id"`
-	Name string `bson:"name"`
-	Description string `bson:"description"`
+	Name         string        `bson:"name"`
+	Description  string        `bson:"description"`
 }
 
-func (l *Label) String() string  {
-	return fmt.Sprintf("Label ---> ContractName:%v LabelName:%v ",l.ContractName,l.Name)
+func (l *Label) String() string {
+	return fmt.Sprintf("Label ---> ContractName:%v LabelName:%v ", l.ContractName, l.Name)
 }
 
 //--------------------
 
 type Function struct {
-	MethodSig []byte `bson:"method_sig"`
-	Skippable bool   `bson:"skippable"`
-	Usage     string `bson:"usage"` // transaction or call
+	MethodSig   []byte `bson:"method_sig"`
+	Skippable   bool   `bson:"skippable"`
+	Usage       string `bson:"usage"` // transaction or call
 	Description string `bson:"description"`
 }
 

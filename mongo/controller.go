@@ -8,10 +8,10 @@ import (
 	"encoding/hex"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/gorilla/mux"
+	"github.com/jiffy-backend/config"
 	"github.com/jiffy-backend/helper"
 	"github.com/pkg/errors"
 	"strings"
-	"github.com/jiffy-backend/config"
 )
 
 type Controller struct {
@@ -107,16 +107,16 @@ func (c *Controller) RegisterContract(w http.ResponseWriter, r *http.Request) {
 }
 
 type LabelInput struct {
-	Name string `json:"name"`
-	Description string `json:"description"`
-	CreatorAddr string 	`json:"creator"`
-	Functions []FuncInput `json:"functions"`
-	ContractName string `json:"contract_name"`
+	Name         string      `json:"name"`
+	Description  string      `json:"description"`
+	CreatorAddr  string      `json:"creator"`
+	Functions    []FuncInput `json:"functions"`
+	ContractName string      `json:"contract_name"`
 }
 type FuncInput struct {
-	MethodSig string `json:"method_sig"`
-	Skippable bool   `json:"skippable"`
-	Usage     int `json:"usage"` // transaction or call(1 == tx , 0== call)
+	MethodSig   string `json:"method_sig"`
+	Skippable   bool   `json:"skippable"`
+	Usage       int    `json:"usage"` // transaction or call(1 == tx , 0== call)
 	Description string `json:"description"`
 }
 
@@ -133,7 +133,7 @@ func (c *Controller) RegisterLabel(w http.ResponseWriter, r *http.Request) {
 		helper.Error(w, http.StatusBadRequest, err.Error())
 		return
 	}
-	if strings.Compare(m.ContractName,"")==0{
+	if strings.Compare(m.ContractName, "") == 0 {
 		err = errors.New("Empty contract name not allowed")
 		helper.Error(w, http.StatusBadRequest, err.Error())
 		return
@@ -145,27 +145,27 @@ func (c *Controller) RegisterLabel(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var functions []Function
-	for _,functionInput := range m.Functions {
+	for _, functionInput := range m.Functions {
 		usage := config.Call
-		if functionInput.Usage == 1{
-			usage =config.Transaction
+		if functionInput.Usage == 1 {
+			usage = config.Transaction
 		}
-		function:= Function{
-			MethodSig:[]byte(functionInput.MethodSig),
-			Skippable:functionInput.Skippable,
-			Usage:usage,
-			Description:functionInput.Description,
+		function := Function{
+			MethodSig:   []byte(functionInput.MethodSig),
+			Skippable:   functionInput.Skippable,
+			Usage:       usage,
+			Description: functionInput.Description,
 		}
 		functions = append(functions, function)
 	}
 
 	label := Label{
 		ContractName: m.ContractName,
-		ContractID:contract.ID,
-		CreatorAddr:contract.Address,
-		Functions:functions,
-		Name:m.Name,
-		Description:m.Description,
+		ContractID:   contract.ID,
+		CreatorAddr:  contract.Address,
+		Functions:    functions,
+		Name:         m.Name,
+		Description:  m.Description,
 	}
 	err = c.DB.RegisterLabel(label)
 	if err != nil {
@@ -189,8 +189,8 @@ func (c *Controller) GetContracts(w http.ResponseWriter, r *http.Request) {
 func (c *Controller) GetContract(w http.ResponseWriter, r *http.Request) {
 	// filter contract by name/address
 	filter := r.FormValue("filter")
-	if strings.Compare(filter,"")==0{
-		err:= errors.New("Please provide address or name of contract to search")
+	if strings.Compare(filter, "") == 0 {
+		err := errors.New("Please provide address or name of contract to search")
 		helper.Error(w, http.StatusBadRequest, err.Error())
 		return
 	}
@@ -219,7 +219,7 @@ func (c *Controller) GetContract(w http.ResponseWriter, r *http.Request) {
 func (c *Controller) GetDapp(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	name := vars["dapp_name"]
-	if strings.Compare(name,"")==0{
+	if strings.Compare(name, "") == 0 {
 		// TODO should be redirected to home page
 	}
 	contract, err := c.DB.GetContractByName(name)
@@ -233,17 +233,16 @@ func (c *Controller) GetDapp(w http.ResponseWriter, r *http.Request) {
 func (c *Controller) CheckExistence(w http.ResponseWriter, r *http.Request) {
 	addr := r.FormValue("address")
 	network := r.FormValue("network")
-	if strings.Compare(addr,"")==0{
-		err:= errors.New("Please provide address")
+	if strings.Compare(addr, "") == 0 {
+		err := errors.New("Please provide address")
 		helper.Error(w, http.StatusBadRequest, err.Error())
 		return
 	}
-	if strings.Compare(network,"")==0{
-		err:= errors.New("Please provide network")
+	if strings.Compare(network, "") == 0 {
+		err := errors.New("Please provide network")
 		helper.Error(w, http.StatusBadRequest, err.Error())
 		return
 	}
-
 
 	hash := helper.GenerateHash(network, addr)
 	hashStr := hex.EncodeToString(hash[:])

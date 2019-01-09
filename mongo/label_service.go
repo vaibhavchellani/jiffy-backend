@@ -23,7 +23,7 @@ func labelModelIndex() mgo.Index {
 
 func NewLabelService(session *Session, dbName string) *LabelService {
 	collection := session.GetCollection(dbName, config.LabelCollection)
-	collection.EnsureIndex(contractModelIndex())
+	collection.EnsureIndex(labelModelIndex())
 	return &LabelService{collection}
 }
 
