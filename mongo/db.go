@@ -6,7 +6,13 @@ import (
 	"github.com/globalsign/mgo/bson"
 	"github.com/jiffy-backend/config"
 	"github.com/jiffy-backend/helper"
+	"strings"
 )
+
+// ALL pre prossing before insert/update/get/delete to be applied here
+// then forwarded to services
+
+
 
 type DB struct{}
 
@@ -105,6 +111,8 @@ func (DB *DB) RegisterLabel(label Label) (err error) {
 	c := NewContractService(session.Copy(), config.DBNAME)
 	labelID := bson.NewObjectId()
 	label.ID = labelID
+	// make contract name lowercase for query
+	label.ContractName = strings.ToLower(label.ContractName)
 
 	// TODO make this operation atomic
 	// first add lable to contract then create entity
@@ -122,6 +130,36 @@ func (DB *DB) RegisterLabel(label Label) (err error) {
 	}
 
 	return nil
+}
+
+func (DB *DB) GetLabelViaCreator(creatorAddr string)(labels []Label,err error)  {
+	session, err := NewSession(config.SERVER)
+	if err != nil {
+		log.Fatalf("Unable to connect to mongo: %s", err)
+	}
+	defer session.Close()
+	l := NewLabelService(session.Copy(), config.DBNAME)
+	l.GetLabelByCreator(creatorAddr,&labels)
+	if err != nil {
+		helper.DBLogger.Error("Cannot fetch all contracts", "Error", err)
+		return labels, err
+	}
+	return labels, nil
+}
+
+func (DB *DB) GetLabelViaContractName(name string) (labels []Label,err error)  {
+	session, err := NewSession(config.SERVER)
+	if err != nil {
+		log.Fatalf("Unable to connect to mongo: %s", err)
+	}
+	defer session.Close()
+	l := NewLabelService(session.Copy(), config.DBNAME)
+	l.GetLabelByCreator(name,&labels)
+	if err != nil {
+		helper.DBLogger.Error("Cannot fetch all contracts", "Error", err)
+		return labels, err
+	}
+	return labels, nil
 }
 
 // -------

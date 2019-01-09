@@ -9,6 +9,15 @@ import (
 	"github.com/jiffy-backend/helper"
 )
 
+type IContractService interface {
+	Register(contract ContractObj) error
+	GetAllContracts(contracts *[]ContractObj) (err error)
+	GetContractByName(contract *ContractObj, name string) (err error)
+	GetContractByAddress(contract *ContractObj, address string) (err error)
+	GetContractByIdentifier(hash string, contract *ContractObj) (err error)
+	AddLabel(_id bson.ObjectId,contractID bson.ObjectId) (err error)
+}
+
 type ContractService struct {
 	collection *mgo.Collection
 }
@@ -74,7 +83,6 @@ func (c *ContractService) GetContractByIdentifier(hash string, contract *Contrac
 
 func (c *ContractService) AddLabel(_id bson.ObjectId,contractID bson.ObjectId) (err error) {
 	selector:= bson.M{"_id":contractID}
-	// TODO add label id to contract obj
 	changeInfo,err :=c.collection.Upsert(selector,bson.M{"$push":bson.M{"label_id":_id}})
 	if err!=nil{
 		return err
