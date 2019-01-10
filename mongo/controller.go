@@ -1,17 +1,24 @@
 package mongo
 
+//
+//
+// All input validation to be performed here
+//
+//
+
 import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
 
 	"encoding/hex"
+	"strings"
+
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/gorilla/mux"
 	"github.com/jiffy-backend/config"
 	"github.com/jiffy-backend/helper"
 	"github.com/pkg/errors"
-	"strings"
 )
 
 type Controller struct {
@@ -112,6 +119,8 @@ type LabelInput struct {
 	CreatorAddr  string      `json:"creator"`
 	Functions    []FuncInput `json:"functions"`
 	ContractName string      `json:"contract_name"`
+	MergeLabels  []string    `json:"merge_labels"`
+	Index        int         `json:"label_index"`
 }
 type FuncInput struct {
 	MethodSig   string `json:"method_sig"`
@@ -230,6 +239,7 @@ func (c *Controller) GetDapp(w http.ResponseWriter, r *http.Request) {
 	helper.JsonResponse(w, http.StatusOK, map[string]interface{}{"status": "Success", "Contract": contract.ABI})
 }
 
+// checks existence of contract by creating identifier = contract address + network
 func (c *Controller) CheckExistence(w http.ResponseWriter, r *http.Request) {
 	addr := r.FormValue("address")
 	network := r.FormValue("network")
@@ -253,3 +263,56 @@ func (c *Controller) CheckExistence(w http.ResponseWriter, r *http.Request) {
 	}
 	helper.JsonResponse(w, http.StatusOK, map[string]interface{}{"status": "Success", "Contract": contract.Json()})
 }
+
+// -------- Label related controllers
+
+// Gets label by contract name or address
+func (c *Controller) GetLabelsByContract(w http.ResponseWriter, r *http.Request) {
+	contract := r.FormValue("contract")
+	if strings.Compare(contract, "") == 0 {
+		err := errors.New("Please provide address or name of contract to search")
+		helper.Error(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	var labels []Label
+	var err error
+	if common.IsHexAddress(contract) {
+		// get labels by contract address
+		labels, err = c.DB.GetLabelViaContractAddr(contract)
+		helper.Error(w, http.StatusBadRequest, err.Error())
+		if err != nil {
+			return
+		}
+	} else {
+		// get labels by contract name
+		labels, err = c.DB.GetLabelViaContractName(contract)
+		if err != nil {
+			helper.Error(w, http.StatusBadRequest, err.Error())
+			return
+		}
+	}
+
+	helper.JsonResponse(w, http.StatusOK, map[string]interface{}{"status": "Success", "Labels": labels, "Count": len(labels)})
+}
+
+// get labels by creator address
+func (c *Controller) GetLabelsByCreator(w http.ResponseWriter, r *http.Request) {
+	creatorAddr := r.FormValue("creator")
+	if strings.Compare(creatorAddr, "") == 0 {
+		err := errors.New("Please provide address or name of contract to search")
+		helper.Error(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	// TODO validate address to be propoper eth address
+
+	labels, err := c.DB.GetLabelViaCreator(creatorAddr)
+	if err != nil {
+		helper.Error(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	helper.JsonResponse(w, http.StatusOK, map[string]interface{}{"status": "Success", "Labels": labels, "Count": len(labels)})
+}
+
+// --------
