@@ -29,6 +29,13 @@ var routes = Routes{
 		[]string{},
 	},
 	Route{
+		"RegisterContract",
+		"POST",
+		"/update/{entity}",
+		controller.Update,
+		[]string{},
+	},
+	Route{
 		"GetContracts",
 		"GET",
 		"/contracts",
@@ -41,6 +48,30 @@ var routes = Routes{
 		"/contract",
 		controller.GetContract,
 		[]string{"filter"},
+	},
+	// get label by contract address/name
+	Route{
+		"GetContract",
+		"GET",
+		"/label",
+		controller.GetLabelsByContract,
+		[]string{"contract"},
+	},
+	// get label by creator address
+	Route{
+		"GetContract",
+		"GET",
+		"/label",
+		controller.GetContract,
+		[]string{"creator"},
+	},
+	// get label by ID
+	Route{
+		"GetContract",
+		"GET",
+		"/label",
+		controller.GetContract,
+		[]string{"id"},
 	},
 	Route{
 		"CheckExistence",
