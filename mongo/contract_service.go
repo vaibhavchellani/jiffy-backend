@@ -24,8 +24,9 @@ type ContractService struct {
 }
 
 func contractModelIndex() mgo.Index {
+	name := helper.GetModelFieldAtIndex(ContractObj{}, 4)
 	return mgo.Index{
-		Key:        []string{"queryable_name"},
+		Key:        []string{name},
 		Unique:     true,
 		DropDups:   true,
 		Background: true,
@@ -63,7 +64,9 @@ func (c *ContractService) GetAllContracts(contracts *[]ContractObj) (err error) 
 
 // get contract by contract name
 func (c *ContractService) GetContractByName(contract *ContractObj, name string) (err error) {
-	err = c.collection.Find(bson.D{{"queryable_name", strings.ToLower(name)}}).One(&contract)
+	// find from the field "queryable_name"
+	err = c.collection.Find(bson.M{helper.GetModelFieldAtIndex(ContractObj{}, 4): strings.ToLower(name)}).One(&contract)
+
 	if err != nil {
 		return err
 	}
@@ -72,7 +75,8 @@ func (c *ContractService) GetContractByName(contract *ContractObj, name string) 
 
 // get contract by contract address
 func (c *ContractService) GetContractByAddress(contract *ContractObj, address string) (err error) {
-	err = c.collection.Find(bson.D{{"contract_address", strings.ToLower(address)}}).One(&contract)
+	// find from the field "contract_address"
+	err = c.collection.Find(bson.M{helper.GetModelFieldAtIndex(ContractObj{}, 1): strings.ToLower(address)}).One(&contract)
 	if err != nil {
 		return err
 	}
@@ -81,7 +85,8 @@ func (c *ContractService) GetContractByAddress(contract *ContractObj, address st
 
 // get contract by hash (address+network)
 func (c *ContractService) GetContractByIdentifier(hash string, contract *ContractObj) (err error) {
-	err = c.collection.Find(bson.D{{"contract_hash", hash}}).One(&contract)
+	// find from the field "contract_hash"
+	err = c.collection.Find(bson.M{helper.GetModelFieldAtIndex(ContractObj{}, 6): hash}).One(&contract)
 	if err != nil {
 		return err
 	}
@@ -90,8 +95,10 @@ func (c *ContractService) GetContractByIdentifier(hash string, contract *Contrac
 
 // add label id to a contract
 func (c *ContractService) AddLabel(_id bson.ObjectId, contractID bson.ObjectId) (err error) {
-	selector := bson.M{"_id": contractID}
-	changeInfo, err := c.collection.Upsert(selector, bson.M{"$push": bson.M{"label_id": _id}})
+	// find from the field "id"
+	selector := bson.M{helper.GetModelFieldAtIndex(ContractObj{}, 9): contractID}
+	// find from the field "label_id"
+	changeInfo, err := c.collection.Upsert(selector, bson.M{"$push": bson.M{helper.GetModelFieldAtIndex(ContractObj{}, 10): _id}})
 	if err != nil {
 		return err
 	}

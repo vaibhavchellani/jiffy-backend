@@ -8,7 +8,8 @@ import (
 	"github.com/globalsign/mgo/bson"
 )
 
-// Make sure to update JSON when doing this
+// Make sure to update JSON when updating this
+// make sure you dont change order / update order on contract_service when you do
 type ContractObj struct {
 	Name         string          `bson:"name"`             // unique name of contract
 	Address      string          `bson:"contract_address"` // contract address

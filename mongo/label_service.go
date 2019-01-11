@@ -13,6 +13,7 @@ import (
 // Add database operations to be performed here
 //
 //
+// TODO replace all tags with helper.GetModelAtIndex
 
 // Interface for all database operations
 type ILabelService interface {
