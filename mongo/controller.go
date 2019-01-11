@@ -113,6 +113,7 @@ func (c *Controller) RegisterContract(w http.ResponseWriter, r *http.Request) {
 	helper.JsonResponse(w, http.StatusOK, map[string]interface{}{"status": "Success", "Contract": contract.Json()})
 }
 
+// label input
 type LabelInput struct {
 	Name         string      `json:"name"`
 	Description  string      `json:"description"`
@@ -122,6 +123,8 @@ type LabelInput struct {
 	MergeLabels  []string    `json:"merge_labels"`
 	Index        int         `json:"label_index"`
 }
+
+// input for label functions
 type FuncInput struct {
 	MethodSig   string `json:"method_sig"`
 	Skippable   bool   `json:"skippable"`
