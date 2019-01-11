@@ -33,12 +33,14 @@ func contractModelIndex() mgo.Index {
 	}
 }
 
+// factory method for generating new contract service
 func NewContractService(session *Session, dbName string) *ContractService {
 	collection := session.GetCollection(dbName, config.ContractCollection)
 	collection.EnsureIndex(contractModelIndex())
 	return &ContractService{collection}
 }
 
+// register new contract
 func (c *ContractService) Register(contract ContractObj) error {
 	objectID := bson.NewObjectId()
 	contract.ID = objectID
@@ -49,6 +51,7 @@ func (c *ContractService) Register(contract ContractObj) error {
 	return nil
 }
 
+// get all contracts deployed
 func (c *ContractService) GetAllContracts(contracts *[]ContractObj) (err error) {
 	err = c.collection.Find(nil).All(&contracts)
 	if err != nil {
@@ -58,6 +61,7 @@ func (c *ContractService) GetAllContracts(contracts *[]ContractObj) (err error) 
 	return nil
 }
 
+// get contract by contract name
 func (c *ContractService) GetContractByName(contract *ContractObj, name string) (err error) {
 	err = c.collection.Find(bson.D{{"queryable_name", strings.ToLower(name)}}).One(&contract)
 	if err != nil {
@@ -66,6 +70,7 @@ func (c *ContractService) GetContractByName(contract *ContractObj, name string) 
 	return nil
 }
 
+// get contract by contract address
 func (c *ContractService) GetContractByAddress(contract *ContractObj, address string) (err error) {
 	err = c.collection.Find(bson.D{{"contract_address", strings.ToLower(address)}}).One(&contract)
 	if err != nil {
@@ -74,7 +79,7 @@ func (c *ContractService) GetContractByAddress(contract *ContractObj, address st
 	return nil
 }
 
-//
+// get contract by hash (address+network)
 func (c *ContractService) GetContractByIdentifier(hash string, contract *ContractObj) (err error) {
 	err = c.collection.Find(bson.D{{"contract_hash", hash}}).One(&contract)
 	if err != nil {

@@ -10,6 +10,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+	"time"
 
 	"encoding/hex"
 	"strings"
@@ -91,14 +92,16 @@ func (c *Controller) RegisterContract(w http.ResponseWriter, r *http.Request) {
 
 	// convert address/name to lowercase to simplify search
 	contract := ContractObj{
-		Name:        m.Name,
-		Address:     strings.ToLower(m.Address),
-		NetworkName: name,
-		ABI:         m.ABI,
-		QueryName:   strings.ToLower(m.Name),
-		Owner:       strings.ToLower(m.Owner),
-		Identifier:  contractHashStr,
-		NetworkURL:  m.Network,
+		Name:         m.Name,
+		Address:      strings.ToLower(m.Address),
+		NetworkName:  name,
+		ABI:          m.ABI,
+		QueryName:    strings.ToLower(m.Name),
+		Owner:        strings.ToLower(m.Owner),
+		Identifier:   contractHashStr,
+		NetworkURL:   m.Network,
+		TimeCreated:  time.Now(),
+		LastModified: time.Now(),
 	}
 
 	helper.ControllerLogger.Debug("hash generated", "hash", contractHashStr)
@@ -195,6 +198,7 @@ func (c *Controller) RegisterLabel(w http.ResponseWriter, r *http.Request) {
 		Functions:    functions,
 		Name:         m.Name,
 		Description:  m.Description,
+		TimeCreated:  time.Now(),
 	}
 	err = c.DB.RegisterLabel(label)
 	if err != nil {

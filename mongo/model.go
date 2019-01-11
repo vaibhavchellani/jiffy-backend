@@ -2,6 +2,7 @@ package mongo
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/globalsign/mgo/bson"
@@ -9,17 +10,19 @@ import (
 
 // Make sure to update JSON when doing this
 type ContractObj struct {
-	Name        string          `bson:"name"`             // unique name of contract
-	Address     string          `bson:"contract_address"` // contract address
-	NetworkName string          `bson:"network_name"`     // network name where contract is deployed
-	ABI         string          `bson:"abi"`              // string representation of contract
-	QueryName   string          `bson:"queryable_name"`   // lower case name
-	Owner       string          `bson:"owner_address"`    // address of contract registrar on jiffy
-	Identifier  string          `bson:"contract_hash"`    // hash(network+address)
-	NetworkURL  string          `bson:"network_url"`      // network URL
-	Cloned      string          `bson:"cloned_from"`      // name of previous dapp --> identified by identifier
-	ID          bson.ObjectId   `bson:"_id"`              // id for contract
-	Labels      []bson.ObjectId `bson:"label_id"`
+	Name         string          `bson:"name"`             // unique name of contract
+	Address      string          `bson:"contract_address"` // contract address
+	NetworkName  string          `bson:"network_name"`     // network name where contract is deployed
+	ABI          string          `bson:"abi"`              // string representation of contract
+	QueryName    string          `bson:"queryable_name"`   // lower case name
+	Owner        string          `bson:"owner_address"`    // address of contract registrar on jiffy
+	Identifier   string          `bson:"contract_hash"`    // hash(network+address)
+	NetworkURL   string          `bson:"network_url"`      // network URL
+	Cloned       string          `bson:"cloned_from"`      // name of previous dapp --> identified by identifier
+	ID           bson.ObjectId   `bson:"_id"`              // id for contract
+	Labels       []bson.ObjectId `bson:"label_id"`
+	TimeCreated  time.Time       `bson:"creation_time"`
+	LastModified time.Time       `bson:"last_modified"`
 }
 
 // generate string representation for contract
@@ -83,6 +86,7 @@ type Label struct {
 	ID           bson.ObjectId `bson:"_id"`
 	Name         string        `bson:"name"`
 	Description  string        `bson:"description"`
+	TimeCreated  time.Time     `bson:"creation_time"`
 }
 
 func (l *Label) String() string {
