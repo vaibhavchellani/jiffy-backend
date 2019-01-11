@@ -121,12 +121,12 @@ func (DB *DB) RegisterLabel(label Label) (err error) {
 	if err != nil {
 		helper.DBLogger.Error("Unable to register label", "Error", err, "Label", label.String())
 		return err
-	} else {
-		err = c.AddLabel(labelID, label.ContractID)
-		if err != nil {
-			helper.DBLogger.Error("Unable to add label to contract", "Error", err, "Label", label.String(), "Contract", label.ContractName)
-			return err
-		}
+	}
+
+	err = c.AddLabel(labelID, label.ContractID)
+	if err != nil {
+		helper.DBLogger.Error("Unable to add label to contract", "Error", err, "Label", label.String(), "Contract", label.ContractName)
+		return err
 	}
 
 	return nil

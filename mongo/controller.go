@@ -40,6 +40,21 @@ func (c *Controller) Register(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// handler for updating (labels / contracts)
+func (c *Controller) Update(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	entity := vars["entity"]
+	if entity == "contract" {
+		c.RegisterContract(w, r)
+	} else if entity == "label" {
+		c.RegisterLabel(w, r)
+	} else {
+		err := errors.New("Invalid Entity updation")
+		w.Write([]byte(err.Error()))
+		return
+	}
+}
+
 type ContractInput struct {
 	Name    string `json:"name"`    // name given to contract => used to generate unique URL
 	Address string `json:"address"` // address of contract

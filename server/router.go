@@ -29,6 +29,13 @@ var routes = Routes{
 		[]string{},
 	},
 	Route{
+		"RegisterContract",
+		"POST",
+		"/update/{entity}",
+		controller.Update,
+		[]string{},
+	},
+	Route{
 		"GetContracts",
 		"GET",
 		"/contracts",

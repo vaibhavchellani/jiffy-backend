@@ -96,6 +96,7 @@ func (c *LabelService) GetLabelByContractName(contract string, labels *[]Label) 
 }
 
 // TODO what happens if someone is merging a label and modifying it at the same time -- Is this important
+// Might not be useful as label once created cannot be changed
 // add new function to existing label
 func (c *LabelService) AddFunctionToLabel(labelID bson.ObjectId, functions []Function) (err error) {
 	selector := bson.M{"_id": labelID}
