@@ -223,8 +223,4 @@ func (DB *DB) GetLabelByIDs(labelIDs []bson.ObjectId) ([]Label, error) {
 	return labels, nil
 }
 
-// func (DB *DB) AddFnToLabel(labelID bson.ObjectId, fns []Function) ([]Label, error) {
-
-// }
-
 // -------

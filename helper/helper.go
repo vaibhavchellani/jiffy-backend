@@ -4,11 +4,13 @@ import (
 	"crypto/sha256"
 	"encoding/json"
 	"fmt"
-	"github.com/ethereum/go-ethereum/accounts/abi"
-	"github.com/jiffy-backend/config"
 	"net/http"
+	"reflect"
 	"regexp"
 	"strings"
+
+	"github.com/ethereum/go-ethereum/accounts/abi"
+	"github.com/jiffy-backend/config"
 )
 
 func MarshallABI(abi abi.ABI) ([]byte, error) {
@@ -49,11 +51,13 @@ func GetNetworkDetails(URL string) (name string, err error) {
 	}
 }
 
+// get JSON error got request
 func Error(w http.ResponseWriter, code int, message string) {
-	JsonResponse(w, code, map[string]string{"error": message})
+	JSONResponse(w, code, map[string]string{"error": message})
 }
 
-func JsonResponse(w http.ResponseWriter, code int, payload interface{}) {
+// get JSON response for request
+func JSONResponse(w http.ResponseWriter, code int, payload interface{}) {
 	response, _ := json.Marshal(payload)
 
 	w.Header().Set("Content-Type", "application/json")
@@ -69,4 +73,12 @@ func IsValidAddress(address string) bool {
 		return false
 	}
 	return true
+}
+
+// get tag of struct at an index
+func GetModelFieldAtIndex(v interface{}, index int) string {
+	st := reflect.TypeOf(v)
+	field := st.Field(index)
+	return field.Tag.Get("bson")
+
 }

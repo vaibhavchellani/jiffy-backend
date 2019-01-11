@@ -1,12 +1,13 @@
 package mongo
 
 import (
+	"log"
+	"strings"
+
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
 	"github.com/jiffy-backend/config"
 	"github.com/jiffy-backend/helper"
-	"log"
-	"strings"
 )
 
 type IContractService interface {
@@ -73,6 +74,7 @@ func (c *ContractService) GetContractByAddress(contract *ContractObj, address st
 	return nil
 }
 
+//
 func (c *ContractService) GetContractByIdentifier(hash string, contract *ContractObj) (err error) {
 	err = c.collection.Find(bson.D{{"contract_hash", hash}}).One(&contract)
 	if err != nil {
@@ -81,6 +83,7 @@ func (c *ContractService) GetContractByIdentifier(hash string, contract *Contrac
 	return nil
 }
 
+// add label id to a contract
 func (c *ContractService) AddLabel(_id bson.ObjectId, contractID bson.ObjectId) (err error) {
 	selector := bson.M{"_id": contractID}
 	changeInfo, err := c.collection.Upsert(selector, bson.M{"$push": bson.M{"label_id": _id}})
@@ -90,3 +93,10 @@ func (c *ContractService) AddLabel(_id bson.ObjectId, contractID bson.ObjectId) 
 	helper.DBLogger.Debug("Added label to contract", "ChangeInfo", changeInfo)
 	return nil
 }
+
+// // get all labels by contract address
+// func (c *ContractService) GetLabels(contractAddr string) (err error) {
+// 	selector := bson.M{"_id": contractID}
+
+// 	return nil
+// }

@@ -18,6 +18,11 @@ import (
 type ILabelService interface {
 	Register(label Label) error
 	GetLabelByCreator(creator string, labels []Label) (err error)
+	GetLabelByID(_id bson.ObjectId, label *Label) (err error)
+	GetLabelByIDS(_ids []bson.ObjectId) ([]Label, error)
+	GetLabelByContractName(contract string, labels *[]Label) (err error)
+	AddFunctionToLabel(labelID bson.ObjectId, functions []Function) (err error)
+	MergeLabelsAndRegister(labelIDs []bson.ObjectId, newLabel Label, index int) (err error)
 }
 
 // Implements ILabelService

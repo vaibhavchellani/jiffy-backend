@@ -21,6 +21,7 @@ import (
 	"github.com/pkg/errors"
 )
 
+// controller struct for DB access
 type Controller struct {
 	DB DB
 }
@@ -55,6 +56,7 @@ func (c *Controller) Update(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// input for registering contract
 type ContractInput struct {
 	Name    string `json:"name"`    // name given to contract => used to generate unique URL
 	Address string `json:"address"` // address of contract
@@ -125,7 +127,7 @@ func (c *Controller) RegisterContract(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	helper.JsonResponse(w, http.StatusOK, map[string]interface{}{"status": "Success", "Contract": contract.Json()})
+	helper.JSONResponse(w, http.StatusOK, map[string]interface{}{"status": "Success", "Contract": contract.Json()})
 }
 
 // label input
@@ -199,7 +201,7 @@ func (c *Controller) RegisterLabel(w http.ResponseWriter, r *http.Request) {
 		helper.Error(w, http.StatusBadRequest, err.Error())
 		return
 	}
-	helper.JsonResponse(w, http.StatusOK, map[string]interface{}{"status": "Success", "Label": label})
+	helper.JSONResponse(w, http.StatusOK, map[string]interface{}{"status": "Success", "Label": label})
 }
 
 // get all contracts
@@ -209,7 +211,7 @@ func (c *Controller) GetContracts(w http.ResponseWriter, r *http.Request) {
 		helper.ControllerLogger.Error("Unable to get all contracts", "Error", err)
 		helper.Error(w, http.StatusBadRequest, err.Error())
 	}
-	helper.JsonResponse(w, http.StatusOK, map[string]interface{}{"status": "Success", "Contract": contracts})
+	helper.JSONResponse(w, http.StatusOK, map[string]interface{}{"status": "Success", "Contract": contracts})
 }
 
 // get a contract by name
@@ -239,7 +241,7 @@ func (c *Controller) GetContract(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	helper.JsonResponse(w, http.StatusOK, map[string]interface{}{"status": "Success", "Contract": contract})
+	helper.JSONResponse(w, http.StatusOK, map[string]interface{}{"status": "Success", "Contract": contract})
 }
 
 // get dapp given dapp name and spit abi
@@ -254,7 +256,7 @@ func (c *Controller) GetDapp(w http.ResponseWriter, r *http.Request) {
 		helper.Error(w, http.StatusBadRequest, err.Error())
 		return
 	}
-	helper.JsonResponse(w, http.StatusOK, map[string]interface{}{"status": "Success", "Contract": contract.ABI})
+	helper.JSONResponse(w, http.StatusOK, map[string]interface{}{"status": "Success", "Contract": contract.ABI})
 }
 
 // checks existence of contract by creating identifier = contract address + network
@@ -279,7 +281,7 @@ func (c *Controller) CheckExistence(w http.ResponseWriter, r *http.Request) {
 		helper.Error(w, http.StatusBadRequest, err.Error())
 		return
 	}
-	helper.JsonResponse(w, http.StatusOK, map[string]interface{}{"status": "Success", "Contract": contract.Json()})
+	helper.JSONResponse(w, http.StatusOK, map[string]interface{}{"status": "Success", "Contract": contract.Json()})
 }
 
 // -------- Label related controllers
@@ -310,7 +312,7 @@ func (c *Controller) GetLabelsByContract(w http.ResponseWriter, r *http.Request)
 		}
 	}
 
-	helper.JsonResponse(w, http.StatusOK, map[string]interface{}{"status": "Success", "Labels": labels, "Count": len(labels)})
+	helper.JSONResponse(w, http.StatusOK, map[string]interface{}{"status": "Success", "Labels": labels, "Count": len(labels)})
 }
 
 // get labels by creator address
@@ -330,7 +332,7 @@ func (c *Controller) GetLabelsByCreator(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	helper.JsonResponse(w, http.StatusOK, map[string]interface{}{"status": "Success", "Labels": labels, "Count": len(labels)})
+	helper.JSONResponse(w, http.StatusOK, map[string]interface{}{"status": "Success", "Labels": labels, "Count": len(labels)})
 }
 
 // --------
