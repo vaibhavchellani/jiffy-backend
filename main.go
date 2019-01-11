@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 
-	"fmt"
+	"github.com/jiffy-backend/helper"
 
 	"github.com/jiffy-backend/server"
 )
@@ -35,7 +35,8 @@ func main() {
 	//	return nil
 	//})
 	http.Handle("/", r)
-	fmt.Printf("Http server started successfully ! Listening on port 8000 \n")
+	helper.MainLogger.Info("Http server started successfully ! Listening on port 8000")
+	// fmt.Printf("Http server started successfully ! Listening on port 8000 \n")
 	// TODO pick port from config
 	log.Fatal(http.ListenAndServe(":8000", r))
 

@@ -77,7 +77,7 @@ func (c *LabelService) GetLabelByID(_id bson.ObjectId, label *Label) (err error)
 	return nil
 }
 
-// get all labels by IDS
+// get all labels by IDs
 func (c *LabelService) GetLabelByIDS(_ids []bson.ObjectId) ([]Label, error) {
 	var labels []Label
 	for _, _id := range _ids {
